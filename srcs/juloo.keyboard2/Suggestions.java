@@ -75,8 +75,16 @@ public final class Suggestions
 
   static final List<String> NO_SUGGESTIONS = Arrays.asList();
 
-  public static interface Callback
-  {
-    public void set_suggestions(List<String> suggestions);
+  public void commit_word(String word) {
+      if (dictionary == null) load_dictionary();
+      String lower = word.toLowerCase();
+      if (dictionary != null) {
+          // If word already exists, move it to the top (simple frequency ranking)
+          dictionary.remove(lower);
+          dictionary.add(0, lower);
+          
+          // Limit size to prevent memory issues
+          if (dictionary.size() > 150000) dictionary.remove(dictionary.size() - 1);
+      }
   }
 }

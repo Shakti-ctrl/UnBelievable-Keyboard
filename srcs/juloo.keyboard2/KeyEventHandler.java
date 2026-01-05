@@ -123,6 +123,7 @@ public final class KeyEventHandler
   public void suggestion_entered(String text)
   {
     replace_text_before_cursor(_typedword.get().length(), text + " ");
+    _suggestions.commit_word(text);
   }
 
   @Override
