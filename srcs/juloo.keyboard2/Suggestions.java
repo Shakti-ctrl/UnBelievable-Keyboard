@@ -52,13 +52,20 @@ public final class Suggestions
   private void load_dictionary() {
       try {
           dictionary = new java.util.ArrayList<>();
-          java.io.InputStream is = Config.globalConfig().getContext().getAssets().open("dictionaries/english.txt");
+          String lang = java.util.Locale.getDefault().getLanguage();
+          String dictPath = "dictionaries/english.txt";
+          if (lang.equals("es")) dictPath = "dictionaries/spanish.txt";
+          else if (lang.equals("fr")) dictPath = "dictionaries/french.txt";
+          
+          java.io.InputStream is = Config.globalConfig().getContext().getAssets().open(dictPath);
           java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(is));
           String line;
           while ((line = reader.readLine()) != null) {
-              if (line.length() > 1) {
-                  dictionary.add(line.toLowerCase());
+              String word = line.split(" ")[0].toLowerCase();
+              if (word.length() > 1) {
+                  dictionary.add(word);
               }
+              if (dictionary.size() > 100000) break; // Limit for performance
           }
           reader.close();
       } catch (Exception e) {

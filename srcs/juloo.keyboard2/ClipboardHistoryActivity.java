@@ -76,6 +76,24 @@ public class ClipboardHistoryActivity extends Activity {
                         .show();
                 });
             }
+
+            // Copy All Clips Button
+            Button btnCopyAll = new Button(this);
+            btnCopyAll.setText("Copy All");
+            btnCopyAll.setOnClickListener(v -> {
+                List<ClipboardHistoryService.HistoryEntry> entries = service.get_history_entries();
+                if (entries.isEmpty()) return;
+                StringBuilder sb = new StringBuilder();
+                for (ClipboardHistoryService.HistoryEntry e : entries) {
+                    sb.append(e.content).append("\n---\n");
+                }
+                android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("All Clips", sb.toString()));
+                    Toast.makeText(this, "All clips copied!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            ((ViewGroup)findViewById(R.id.btn_clear_all).getParent()).addView(btnCopyAll, 1);
             
         } catch (Throwable t) {
             // Catching Throwable to include Errors and RuntimeExceptions
