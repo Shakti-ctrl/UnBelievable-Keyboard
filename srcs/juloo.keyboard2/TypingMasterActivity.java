@@ -33,8 +33,9 @@ public class TypingMasterActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         
-        // Loading the new version of TypingMaster as requested
-        webView.loadUrl("https://createdbyfahad.github.io/TypingMaster/");
+        // Point to the public/index.html served by our local frontend server
+        // Using common Replit domain pattern or localhost if internal
+        webView.loadUrl("file:///android_asset/typing_master/index.html");
         
         setContentView(webView);
     }
