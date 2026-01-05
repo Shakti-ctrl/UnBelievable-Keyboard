@@ -30,6 +30,12 @@
               android:exported="true">
     </activity>
 
+    <activity android:name="juloo.keyboard2.TypingMasterActivity"
+              android:label="Typing Master"
+              android:theme="@android:style/Theme.NoTitleBar"
+              android:exported="true">
+    </activity>
+
     <provider
         android:name="androidx.core.content.FileProvider"
         android:authorities="juloo.keyboard2.provider"

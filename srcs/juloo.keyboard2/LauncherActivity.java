@@ -57,6 +57,7 @@ public class LauncherActivity extends Activity implements Handler.Callback
         });
     }
   }
+  }
 
   @Override
   public void onStart()
