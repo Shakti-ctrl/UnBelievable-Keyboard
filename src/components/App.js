@@ -19,6 +19,7 @@ import Train from './Train';
 import Track from './Track';
 import Register from './Register';
 import DataVis from "./DataVis";
+import Coach from './Coach';
 
 // greets the user/guest when they enter the app
 function Greetings(props){
@@ -65,14 +66,9 @@ class App extends Component {
         <BrowserRouter basename="/android_asset/typing_master">
           <div className="container-fluid p-0">
             <HeaderWithRouter data={this.state} logoutHandler={this.props.user.logoutHandler} errorMsg={this.props.user.state.errorMsg}/>
-            <Route exact path="/" render={(props) => (
-              <div>
-              <Greetings userName={this.props.user.state.userInfo.name}/>
-              <SingleTest {...props} isLoggedIn={this.state.isLoggedIn}/>
-
-              </div>)}
-            />
-            <Route path="/register" render={(props) => (
+            <Route exact path="/" component={Tester} />
+            <Route path="/coach" component={Coach} />
+            <Route path="/user/train" render={(props) => (
               <PrivateRoute component={Register} isLoggedIn={this.state.isLoggedIn} shouldBeLoggedIn={false} redirect="/" {...props} />
               )} />
             <Route path="/login" render={(props) => (
