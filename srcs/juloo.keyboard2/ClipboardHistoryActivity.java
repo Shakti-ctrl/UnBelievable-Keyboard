@@ -213,8 +213,10 @@ public class ClipboardHistoryActivity extends Activity {
     }
 
     private void exportHistory() {
-        StringBuilder sb = new StringBuilder();
         List<ClipboardHistoryService.HistoryEntry> history = service.get_history_entries();
+        if (history.isEmpty()) return;
+
+        StringBuilder sb = new StringBuilder();
         for (ClipboardHistoryService.HistoryEntry entry : history) {
             sb.append("Time: ").append(entry.timestamp).append("\n");
             sb.append("Version: ").append(entry.version).append("\n");
@@ -222,10 +224,21 @@ public class ClipboardHistoryActivity extends Activity {
             sb.append("Content: ").append(entry.content).append("\n");
             sb.append("---\n");
         }
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
-        sendIntent.setType("text/plain");
-        startActivity(Intent.createChooser(sendIntent, "Export History"));
+
+        try {
+            java.io.File file = new java.io.File(getExternalFilesDir(null), "clipboard_export_" + System.currentTimeMillis() + ".txt");
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(sb.toString());
+            writer.close();
+
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Export History"));
+        } catch (Exception e) {
+            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

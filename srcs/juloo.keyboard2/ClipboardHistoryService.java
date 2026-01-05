@@ -121,7 +121,6 @@ public final class ClipboardHistoryService
     return dst;
   }
 
-  /** This will call [on_clipboard_history_change]. */
   public synchronized void remove_history_entry(String clip)
   {
     int last_pos = _history.size() - 1;
@@ -130,7 +129,6 @@ public final class ClipboardHistoryService
     {
       if (!_history.get(pos).content.equals(clip))
         continue;
-      // Removing the current clipboard, clear the system clipboard.
       if (pos == last_pos)
         last_pos_changed = true;
       _history.remove(pos);
@@ -142,6 +140,7 @@ public final class ClipboardHistoryService
       else
         _cm.setText("");
     }
+    save_history_to_prefs(juloo.keyboard2.Config.globalConfig().getContext());
     if (_listener != null)
       _listener.on_clipboard_history_change();
   }
