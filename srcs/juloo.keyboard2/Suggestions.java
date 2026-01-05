@@ -22,8 +22,16 @@ public final class Suggestions
     }
     else
     {
-      // TODO
-      _callback.set_suggestions(Arrays.asList(word));
+      // Mocking advanced suggestions for now since OpenBoard classes aren't present
+      // In a real scenario, we would link to LatinIME's Suggest engine here.
+      List<String> mockSuggestions = new java.util.ArrayList<>();
+      mockSuggestions.add(word);
+      if (word.length() > 1) {
+          mockSuggestions.add(word + "s");
+          mockSuggestions.add(word + "ing");
+          mockSuggestions.add(word + "ed");
+      }
+      _callback.set_suggestions(mockSuggestions);
     }
   }
 
