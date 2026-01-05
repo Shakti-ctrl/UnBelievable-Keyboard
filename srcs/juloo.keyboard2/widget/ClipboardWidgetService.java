@@ -32,9 +32,6 @@ class ClipboardRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
 
     @Override
     public void onDataSetChanged() {
-        // In a real app, this would fetch from ClipboardHistoryService's database
-        // For now, we'll try to get the history from the service if it exposes it
-        // Or mock it with 15 slots as requested
         mClips = ClipboardHistoryService.getRecentClips(mContext, 15);
     }
 

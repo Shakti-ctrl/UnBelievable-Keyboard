@@ -151,6 +151,7 @@ public final class ClipboardHistoryService
       if (ent.content.equals(clip)) return;
     }
     add_clip_with_metadata(clip, "", "");
+    notifyWidget(juloo.keyboard2.Config.globalConfig().getContext());
   }
 
   public synchronized void add_clip_with_metadata(String clip, String description, String version) {
@@ -165,6 +166,36 @@ public final class ClipboardHistoryService
     save_history_to_prefs(juloo.keyboard2.Config.globalConfig().getContext());
     if (_listener != null)
       _listener.on_clipboard_history_change();
+    notifyWidget(juloo.keyboard2.Config.globalConfig().getContext());
+  }
+
+  public static void notifyWidget(Context context) {
+    if (context == null) return;
+    android.content.Intent intent = new android.content.Intent(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+    android.content.ComponentName widget = new android.content.ComponentName(context, juloo.keyboard2.widget.ClipboardWidgetProvider.class);
+    int[] ids = android.appwidget.AppWidgetManager.getInstance(context).getAppWidgetIds(widget);
+    intent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+    context.sendBroadcast(intent);
+    // Also notify the collection view to refresh
+    android.appwidget.AppWidgetManager.getInstance(context).notifyAppWidgetViewDataChanged(ids, R.id.clip_list);
+  }
+
+  public static List<String> getRecentClips(Context context, int limit) {
+    ClipboardHistoryService service = get_service(context);
+    if (service == null) return new java.util.ArrayList<>();
+    List<String> history = service.clear_expired_and_get_history();
+    java.util.Collections.reverse(history); // Get most recent first
+    if (history.size() > limit) {
+      return history.subList(0, limit);
+    }
+    return history;
+  }
+
+  public static void copyToClipboard(Context context, String text) {
+    android.content.ClipboardManager cm = (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+    android.content.ClipData clip = android.content.ClipData.newPlainText("Copied Text", text);
+    cm.setPrimaryClip(clip);
+    android.widget.Toast.makeText(context, "Copied to clipboard", android.widget.Toast.LENGTH_SHORT).show();
   }
 
   private void load_history_from_prefs(Context ctx) {
