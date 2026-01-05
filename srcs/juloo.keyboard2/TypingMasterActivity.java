@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -12,17 +11,16 @@ import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.Random;
 
 public class TypingMasterActivity extends Activity {
 
-    private TextView tvTarget, tvStats, tvLevelInfo, tvHeader;
+    private TextView tvTarget, tvStats, tvLevelInfo;
     private EditText etInput;
     private int currentLevel = 1;
     private int wordsTyped = 0;
@@ -31,91 +29,55 @@ public class TypingMasterActivity extends Activity {
     private int mistakes = 0;
     private boolean isTestRunning = false;
 
-    private static final String ACCENT_COLOR = "#00E5FF";
-    private static final String BG_COLOR = "#121212";
-    private static final String CARD_BG = "#1E1E1E";
-
     private static final String[][] LEVEL_WORDS = {
-        {"the", "be", "to", "of", "and", "in", "that", "have"},
-        {"rhythm", "flow", "typing", "master", "speed", "quick"},
-        {"complex", "challenge", "accuracy", "practice", "mobile"},
-        {"performance", "consistency", "neuroscience", "keyboard"},
-        {"competitive", "excellence", "professional", "optimization"}
+        {"the", "be", "to", "of", "and", "in", "that", "have"}, // Level 1
+        {"rhythm", "flow", "typing", "master", "speed", "quick"}, // Level 2
+        {"complex", "challenge", "accuracy", "practice", "mobile"}, // Level 3
+        {"performance", "consistency", "neuroscience", "keyboard"}, // Level 4
+        {"competitive", "excellence", "professional", "optimization"} // Level 5
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Fullscreen dark theme
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        
-        setupAdvancedUI();
+        setupTrainingUI();
     }
 
-    private void setupAdvancedUI() {
+    private void setupTrainingUI() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.parseColor(BG_COLOR));
-        root.setPadding(40, 60, 40, 40);
+        root.setBackgroundColor(Color.parseColor("#121212"));
+        root.setPadding(40, 40, 40, 40);
 
-        // Advanced Header with Neon Glow effect simulation
-        tvHeader = new TextView(this);
-        tvHeader.setText("TYPING MASTER PRO");
-        tvHeader.setTextColor(Color.parseColor(ACCENT_COLOR));
-        tvHeader.setTextSize(26);
-        tvHeader.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
-        tvHeader.setGravity(Gravity.CENTER);
-        tvHeader.setPadding(0, 0, 0, 40);
-        root.addView(tvHeader);
-
-        // Level Status Card
-        LinearLayout levelCard = createStyledCard();
         tvLevelInfo = new TextView(this);
-        tvLevelInfo.setTextColor(Color.WHITE);
-        tvLevelInfo.setTextSize(14);
+        tvLevelInfo.setTextColor(Color.parseColor("#00E5FF"));
+        tvLevelInfo.setTextSize(18);
         tvLevelInfo.setGravity(Gravity.CENTER);
         updateLevelDisplay();
-        levelCard.addView(tvLevelInfo);
-        root.addView(levelCard);
+        root.addView(tvLevelInfo);
 
-        // Stats Bar
-        LinearLayout statsBar = new LinearLayout(this);
-        statsBar.setOrientation(LinearLayout.HORIZONTAL);
-        statsBar.setGravity(Gravity.CENTER);
-        statsBar.setPadding(0, 40, 0, 40);
-        
         tvStats = new TextView(this);
-        tvStats.setTextColor(Color.parseColor("#888888"));
+        tvStats.setTextColor(Color.WHITE);
         tvStats.setTextSize(16);
-        tvStats.setText("SPEED: 0 WPM  |  ACC: 100%");
-        statsBar.addView(tvStats);
-        root.addView(statsBar);
+        tvStats.setGravity(Gravity.CENTER);
+        tvStats.setText("WPM: 0 | Accuracy: 100%");
+        root.addView(tvStats);
 
-        // Main Target Area (Neon Cyan)
         tvTarget = new TextView(this);
-        tvTarget.setTextColor(Color.parseColor(ACCENT_COLOR));
-        tvTarget.setTextSize(48);
-        tvTarget.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        tvTarget.setTextColor(Color.parseColor("#00E5FF"));
+        tvTarget.setTextSize(32);
+        tvTarget.setTypeface(null, Typeface.BOLD);
         tvTarget.setGravity(Gravity.CENTER);
-        tvTarget.setPadding(0, 80, 0, 80);
+        tvTarget.setPadding(0, 100, 0, 100);
         root.addView(tvTarget);
 
-        // Input Field with Custom Design
         etInput = new EditText(this);
-        etInput.setHint("TYPE WORD HERE");
-        etInput.setHintTextColor(Color.parseColor("#444444"));
+        etInput.setHint("Type here...");
+        etInput.setHintTextColor(Color.GRAY);
         etInput.setTextColor(Color.WHITE);
         etInput.setGravity(Gravity.CENTER);
-        etInput.setTextSize(20);
-        etInput.setBackground(createInputDrawable());
-        etInput.setPadding(40, 40, 40, 40);
-        
-        LinearLayout.LayoutParams inputParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        inputParams.setMargins(20, 40, 20, 80);
-        etInput.setLayoutParams(inputParams);
+        etInput.setBackgroundColor(Color.parseColor("#1E1E1E"));
+        etInput.setPadding(20, 40, 20, 40);
         root.addView(etInput);
 
         etInput.addTextChangedListener(new TextWatcher() {
@@ -129,49 +91,15 @@ public class TypingMasterActivity extends Activity {
             public void afterTextChanged(Editable s) {}
         });
 
-        // Advanced Control Button
         Button btnRestart = new Button(this);
-        btnRestart.setText("RESET TRAINING");
+        btnRestart.setText("RESTART LEVEL");
+        btnRestart.setBackgroundColor(Color.parseColor("#00E5FF"));
         btnRestart.setTextColor(Color.BLACK);
-        btnRestart.setTypeface(Typeface.DEFAULT_BOLD);
-        btnRestart.setBackground(createButtonDrawable());
         btnRestart.setOnClickListener(v -> startTest());
-        
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 140);
-        btnParams.setMargins(60, 40, 60, 0);
-        btnRestart.setLayoutParams(btnParams);
         root.addView(btnRestart);
 
         setContentView(root);
         startTest();
-    }
-
-    private LinearLayout createStyledCard() {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(30, 20, 30, 20);
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(Color.parseColor(CARD_BG));
-        gd.setCornerRadius(20f);
-        gd.setStroke(2, Color.parseColor("#333333"));
-        card.setBackground(gd);
-        return card;
-    }
-
-    private GradientDrawable createInputDrawable() {
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(Color.BLACK);
-        gd.setCornerRadius(10f);
-        gd.setStroke(3, Color.parseColor("#333333"));
-        return gd;
-    }
-
-    private GradientDrawable createButtonDrawable() {
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(Color.parseColor(ACCENT_COLOR));
-        gd.setCornerRadius(70f);
-        return gd;
     }
 
     private void startTest() {
@@ -187,15 +115,14 @@ public class TypingMasterActivity extends Activity {
     private void nextWord() {
         String[] words = LEVEL_WORDS[currentLevel - 1];
         currentTargetWord = words[new Random().nextInt(words.length)];
-        tvTarget.setText(currentTargetWord.toUpperCase());
+        tvTarget.setText(currentTargetWord);
     }
 
     private void checkInput(String input) {
         if (!isTestRunning) return;
-        String cleanInput = input.trim();
 
-        if (cleanInput.equalsIgnoreCase(currentTargetWord)) {
-            if (input.endsWith(" ") || input.length() >= currentTargetWord.length()) {
+        if (input.equals(currentTargetWord + " ") || input.equals(currentTargetWord)) {
+            if (input.endsWith(" ") || input.length() == currentTargetWord.length()) {
                 wordsTyped++;
                 updateStats();
                 etInput.setText("");
@@ -205,7 +132,7 @@ public class TypingMasterActivity extends Activity {
                     nextWord();
                 }
             }
-        } else if (input.length() > 0 && !currentTargetWord.toLowerCase().startsWith(input.toLowerCase())) {
+        } else if (!currentTargetWord.startsWith(input)) {
             mistakes++;
             updateStats();
         }
@@ -216,17 +143,17 @@ public class TypingMasterActivity extends Activity {
         double minutes = elapsed / 60000.0;
         int wpm = (int) (wordsTyped / (minutes > 0 ? minutes : 1.0));
         int accuracy = (int) Math.max(0, 100 - (mistakes * 2));
-        tvStats.setText("SPEED: " + wpm + " WPM  |  ACC: " + accuracy + "%");
+        tvStats.setText("WPM: " + wpm + " | Accuracy: " + accuracy + "%");
     }
 
     private void updateLevelDisplay() {
-        String info = "MODE: ELITE COACH  |  RANK: ";
+        String info = "LEVEL " + currentLevel + ": ";
         switch (currentLevel) {
-            case 1: info += "NOVICE"; break;
-            case 2: info += "TRAINEE"; break;
-            case 3: info += "SPECIALIST"; break;
-            case 4: info += "EXPERT"; break;
-            case 5: info += "ELITE MASTER"; break;
+            case 1: info += "Foundation Drills"; break;
+            case 2: info += "Rhythm Flow"; break;
+            case 3: info += "Speed Burst"; break;
+            case 4: info += "Endurance Pro"; break;
+            case 5: info += "Elite Competitive"; break;
         }
         tvLevelInfo.setText(info);
     }
@@ -236,11 +163,10 @@ public class TypingMasterActivity extends Activity {
         if (currentLevel < 5) {
             currentLevel++;
             updateLevelDisplay();
-            tvTarget.setText("SUCCESS");
-            new Handler().postDelayed(this::startTest, 1500);
+            tvTarget.setText("LEVEL COMPLETE!");
+            new Handler().postDelayed(this::startTest, 2000);
         } else {
-            tvTarget.setText("MAX RANK");
-            tvTarget.setTextColor(Color.YELLOW);
+            tvTarget.setText("ELITE MASTER ACHIEVED!");
         }
     }
 }

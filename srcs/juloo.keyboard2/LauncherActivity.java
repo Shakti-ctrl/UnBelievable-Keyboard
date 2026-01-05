@@ -3,6 +3,9 @@ package juloo.keyboard2;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Animatable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +42,6 @@ public class LauncherActivity extends Activity implements Handler.Callback
       _tryhere_area.addOnUnhandledKeyEventListener(
           this.new Tryhere_OnUnhandledKeyEventListener());
     _handler = new Handler(getMainLooper(), this);
-    
     View btnClipboard = findViewById(R.id.btn_clipboard_history);
     if (btnClipboard != null) {
         btnClipboard.setOnClickListener(v -> {
@@ -47,11 +49,9 @@ public class LauncherActivity extends Activity implements Handler.Callback
             startActivity(intent);
         });
     }
-    
     View btnTypingMaster = findViewById(R.id.btn_typing_master);
     if (btnTypingMaster != null) {
         btnTypingMaster.setOnClickListener(v -> {
-            // This now acts as the "Tutorial" button opening the Coach system
             Intent intent = new Intent(this, TypingMasterActivity.class);
             startActivity(intent);
         });
@@ -74,7 +74,7 @@ public class LauncherActivity extends Activity implements Handler.Callback
   public boolean handleMessage(Message _msg)
   {
     for (Animatable anim : _animations)
-      if (anim != null) anim.start();
+      anim.start();
     _handler.sendEmptyMessageDelayed(0, 3000);
     return true;
   }
@@ -113,7 +113,6 @@ public class LauncherActivity extends Activity implements Handler.Callback
   Animatable find_anim(int id)
   {
     ImageView img = (ImageView)findViewById(id);
-    if (img == null) return null;
     return (Animatable)img.getDrawable();
   }
 
@@ -121,8 +120,10 @@ public class LauncherActivity extends Activity implements Handler.Callback
   {
     public boolean onUnhandledKeyEvent(View v, KeyEvent ev)
     {
+      // Don't handle the back key
       if (ev.getKeyCode() == KeyEvent.KEYCODE_BACK)
         return false;
+      // Key release of modifiers would erase interesting data
       if (KeyEvent.isModifierKey(ev.getKeyCode()))
         return false;
       StringBuilder s = new StringBuilder();
@@ -130,6 +131,7 @@ public class LauncherActivity extends Activity implements Handler.Callback
       if (ev.isShiftPressed()) s.append("Shift+");
       if (ev.isCtrlPressed()) s.append("Ctrl+");
       if (ev.isMetaPressed()) s.append("Meta+");
+      // s.append(ev.getDisplayLabel());
       String kc = KeyEvent.keyCodeToString(ev.getKeyCode());
       s.append(kc.replaceFirst("^KEYCODE_", ""));
       _tryhere_text.setText(s.toString());

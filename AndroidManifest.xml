@@ -24,12 +24,6 @@
       </intent-filter>
     </activity>
 
-    <activity android:name="juloo.keyboard2.WelcomeActivity" android:icon="@mipmap/ic_launcher" android:theme="@android:style/Theme.NoTitleBar" android:exported="true">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-      </intent-filter>
-    </activity>
-
     <activity android:name="juloo.keyboard2.ClipboardHistoryActivity"
               android:label="Clipboard History"
               android:theme="@android:style/Theme.DeviceDefault"
