@@ -52,6 +52,21 @@ public final class Suggestions
   private void load_dictionary() {
       try {
           dictionary = new java.util.ArrayList<>();
+          
+          // Load learned words from internal storage
+          java.io.File learnedFile = new java.io.File(Config.globalConfig().getContext().getFilesDir(), "user_dictionary.txt");
+          if (learnedFile.exists()) {
+              java.io.BufferedReader learnedReader = new java.io.BufferedReader(new java.io.FileReader(learnedFile));
+              String line;
+              while ((line = learnedReader.readLine()) != null) {
+                  String word = line.trim().toLowerCase();
+                  if (!word.isEmpty() && !dictionary.contains(word)) {
+                      dictionary.add(word);
+                  }
+              }
+              learnedReader.close();
+          }
+
           String lang = java.util.Locale.getDefault().getLanguage();
           String dictPath = "dictionaries/english.txt";
           if (lang.equals("es")) dictPath = "dictionaries/spanish.txt";
@@ -83,13 +98,39 @@ public final class Suggestions
   public void commit_word(String word) {
       if (dictionary == null) load_dictionary();
       String lower = word.toLowerCase();
+      if (lower.length() < 2) return;
+      
       if (dictionary != null) {
-          // If word already exists, move it to the top (simple frequency ranking)
+          // If word already exists, move it to the top (frequency ranking)
           dictionary.remove(lower);
           dictionary.add(0, lower);
           
+          // Save to persistent storage
+          save_learned_word(lower);
+          
           // Limit size to prevent memory issues
           if (dictionary.size() > 150000) dictionary.remove(dictionary.size() - 1);
+      }
+  }
+
+  private void save_learned_word(String word) {
+      try {
+          java.io.File learnedFile = new java.io.File(Config.globalConfig().getContext().getFilesDir(), "user_dictionary.txt");
+          java.util.List<String> userWords = new java.util.ArrayList<>();
+          if (learnedFile.exists()) {
+              java.util.Scanner s = new java.util.Scanner(learnedFile);
+              while (s.hasNextLine()) userWords.add(s.nextLine());
+              s.close();
+          }
+          userWords.remove(word);
+          userWords.add(0, word);
+          if (userWords.size() > 5000) userWords.remove(userWords.size() - 1);
+          
+          java.io.FileWriter writer = new java.io.FileWriter(learnedFile);
+          for (String w : userWords) writer.write(w + "\n");
+          writer.close();
+      } catch (Exception e) {
+          android.util.Log.e("Suggestions", "Failed to save learned word", e);
       }
   }
 }

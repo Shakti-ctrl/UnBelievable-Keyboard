@@ -237,6 +237,12 @@ public final class KeyEventHandler
       return;
     _autocap.typed(text);
     _typedword.typed(text);
+    if (text.endsWith(" ") || text.endsWith("\n") || text.endsWith(".") || text.endsWith(",")) {
+        String word = _typedword.get().trim();
+        if (word.length() >= 2) {
+            _suggestions.commit_word(word);
+        }
+    }
     conn.commitText(text, 1);
   }
 
