@@ -185,7 +185,7 @@ public class ClipboardHistoryActivity extends Activity {
         descInput.setHint("Description");
         
         Spinner spinner = new Spinner(this);
-        String[] formats = {".txt", ".pdf"};
+        String[] formats = {".txt", ".pdf", ".js", ".java", ".html"};
         ArrayAdapter<String> spinAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, formats);
         spinner.setAdapter(spinAdapter);
 
@@ -209,11 +209,28 @@ public class ClipboardHistoryActivity extends Activity {
                 
                 if (ext.equals(".pdf")) {
                     exportAsPdf(text, desc);
-                } else {
+                } else if (ext.equals(".txt")) {
                     exportAsTxt(text, desc);
+                } else {
+                    // Handle other extensions as generic text files for now
+                    exportAsGenericText(text, desc, ext);
                 }
             })
             .show();
+    }
+
+    private void exportAsGenericText(String text, String desc, String ext) {
+        String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+        String content = "Time: " + timestamp + "\nDescription: " + desc + "\nContent:\n" + text;
+        try {
+            java.io.File file = new java.io.File(getExternalFilesDir(null), "note_" + System.currentTimeMillis() + ext);
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(content);
+            writer.close();
+            shareFile(file, "text/plain");
+        } catch (Exception e) {
+            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void exportAsTxt(String text, String desc) {
