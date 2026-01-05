@@ -62,6 +62,21 @@ public class ClipboardHistoryActivity extends Activity {
             View btnExport = findViewById(R.id.btn_export_history);
             if (btnExport != null) btnExport.setOnClickListener(v -> exportHistory());
             
+            View btnClear = findViewById(R.id.btn_clear_all);
+            if (btnClear != null) {
+                btnClear.setOnClickListener(v -> {
+                    new AlertDialog.Builder(this)
+                        .setTitle("Clear History")
+                        .setMessage("Are you sure you want to delete all clips?")
+                        .setPositiveButton("Yes", (d, w) -> {
+                            service.clear_history();
+                            updateList();
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+                });
+            }
+            
         } catch (Throwable t) {
             // Catching Throwable to include Errors and RuntimeExceptions
             String errorMsg = "Critical failure on startup.\n\nType: " + t.getClass().getName() + "\nMessage: " + t.getMessage();
@@ -175,6 +190,14 @@ public class ClipboardHistoryActivity extends Activity {
             v.setBackgroundColor(p % 2 == 0 ? 0xFFF5F5F5 : 0xFFFFFFFF);
             
             v.setOnClickListener(view -> showEditDialog(ent));
+            v.setOnLongClickListener(view -> {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("Clip", ent.content));
+                    Toast.makeText(ClipboardHistoryActivity.this, "Copied to clipboard!", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            });
             return v;
         }
     }
