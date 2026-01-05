@@ -294,12 +294,14 @@ public class Keyboard2 extends InputMethodService
     updateLayoutHeightOf(window, ViewGroup.LayoutParams.MATCH_PARENT);
     final View inputArea = window.findViewById(android.R.id.inputArea);
 
-    updateLayoutHeightOf(
-            (View) inputArea.getParent(),
-            isFullscreenMode()
-                    ? ViewGroup.LayoutParams.MATCH_PARENT
-                    : ViewGroup.LayoutParams.WRAP_CONTENT);
-    updateLayoutGravityOf((View) inputArea.getParent(), Gravity.BOTTOM);
+    if (inputArea != null && inputArea.getParent() != null) {
+      updateLayoutHeightOf(
+              (View) inputArea.getParent(),
+              isFullscreenMode()
+                      ? ViewGroup.LayoutParams.MATCH_PARENT
+                      : ViewGroup.LayoutParams.WRAP_CONTENT);
+      updateLayoutGravityOf((View) inputArea.getParent(), Gravity.BOTTOM);
+    }
 
   }
 

@@ -23,7 +23,7 @@
             android:layout_height="32dp"
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_launcher_foreground"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="?android:attr/selectableItemBackground"
             android:scaleType="centerInside"/>
     </RelativeLayout>
 
