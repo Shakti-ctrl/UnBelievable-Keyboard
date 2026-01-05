@@ -43,6 +43,17 @@ public class ClipboardHistoryActivity extends Activity {
                 return;
             }
             
+            EditText searchBar = findViewById(R.id.search_bar);
+            if (searchBar != null) {
+                searchBar.addTextChangedListener(new android.text.TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (adapter != null) adapter.filter(s.toString());
+                    }
+                    @Override public void afterTextChanged(android.text.Editable s) {}
+                });
+            }
+            
             updateList();
 
             View btnAdd = findViewById(R.id.btn_add_new);
@@ -102,40 +113,66 @@ public class ClipboardHistoryActivity extends Activity {
     private void updateList() {
         if (service == null) return;
         List<ClipboardHistoryService.HistoryEntry> history = service.get_history_entries();
+        // Sort latest first
+        java.util.Collections.sort(history, (a, b) -> b.timestamp.compareTo(a.timestamp));
         adapter = new ClipboardAdapter(history);
         listView.setAdapter(adapter);
     }
 
     class ClipboardAdapter extends BaseAdapter {
         List<ClipboardHistoryService.HistoryEntry> items;
-        ClipboardAdapter(List<ClipboardHistoryService.HistoryEntry> items) { this.items = items; }
-        @Override public int getCount() { return items.size(); }
-        @Override public Object getItem(int p) { return items.get(p); }
+        List<ClipboardHistoryService.HistoryEntry> filteredItems;
+        ClipboardAdapter(List<ClipboardHistoryService.HistoryEntry> items) { 
+            this.items = items; 
+            this.filteredItems = new java.util.ArrayList<>(items);
+        }
+        void filter(String query) {
+            filteredItems.clear();
+            if (query.isEmpty()) {
+                filteredItems.addAll(items);
+            } else {
+                for (ClipboardHistoryService.HistoryEntry ent : items) {
+                    if (ent.content.toLowerCase().contains(query.toLowerCase()) || 
+                        ent.description.toLowerCase().contains(query.toLowerCase())) {
+                        filteredItems.add(ent);
+                    }
+                }
+            }
+            notifyDataSetChanged();
+        }
+        @Override public int getCount() { return filteredItems.size(); }
+        @Override public Object getItem(int p) { return filteredItems.get(p); }
         @Override public long getItemId(int p) { return p; }
         @Override public View getView(int p, View v, ViewGroup prnt) {
             if (v == null) {
                 LinearLayout ll = new LinearLayout(ClipboardHistoryActivity.this);
                 ll.setOrientation(LinearLayout.VERTICAL);
-                ll.setPadding(32, 24, 32, 24);
+                ll.setPadding(40, 30, 40, 30);
+                ll.setBackgroundResource(android.R.drawable.list_selector_background);
                 
-                TextView text = new TextView(ClipboardHistoryActivity.this);
-                text.setId(android.R.id.text1);
-                text.setTextSize(16);
-                text.setTextColor(0xFF000000);
+                TextView title = new TextView(ClipboardHistoryActivity.this);
+                title.setId(android.R.id.text1);
+                title.setTextSize(18);
+                title.setTextColor(0xFF212121);
+                title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
                 
                 TextView sub = new TextView(ClipboardHistoryActivity.this);
                 sub.setId(android.R.id.text2);
-                sub.setTextSize(12);
-                sub.setTextColor(0xFF666666);
+                sub.setTextSize(13);
+                sub.setTextColor(0xFF757575);
+                sub.setPadding(0, 8, 0, 0);
                 
-                ll.addView(text);
+                ll.addView(title);
                 ll.addView(sub);
                 v = ll;
             }
-            ClipboardHistoryService.HistoryEntry ent = items.get(p);
-            ((TextView)v.findViewById(android.R.id.text1)).setText(ent.content);
-            String info = ent.timestamp + (ent.version.isEmpty() ? "" : " | Ver: " + ent.version) + (ent.description.isEmpty() ? "" : "\n" + ent.description);
+            ClipboardHistoryService.HistoryEntry ent = filteredItems.get(p);
+            ((TextView)v.findViewById(android.R.id.text1)).setText((p + 1) + ". " + ent.content);
+            String info = "🕒 " + ent.timestamp + (ent.version.isEmpty() ? "" : " | 📦 v" + ent.version) + (ent.description.isEmpty() ? "" : "\n📝 " + ent.description);
             ((TextView)v.findViewById(android.R.id.text2)).setText(info);
+            
+            // Alternating backgrounds for advanced look
+            v.setBackgroundColor(p % 2 == 0 ? 0xFFF5F5F5 : 0xFFFFFFFF);
             
             v.setOnClickListener(view -> showEditDialog(ent));
             return v;
