@@ -227,7 +227,7 @@ public final class ClipboardHistoryService
     editor.apply();
   }
 
-  static final class HistoryEntry
+  public static final class HistoryEntry
   {
     public final String content;
     public final String timestamp;
