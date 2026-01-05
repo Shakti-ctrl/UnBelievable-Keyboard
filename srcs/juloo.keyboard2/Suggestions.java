@@ -67,12 +67,16 @@ public final class Suggestions
               learnedReader.close();
           }
 
-          String lang = java.util.Locale.getDefault().getLanguage();
-          String dictPath = "dictionaries/english.txt";
-          if (lang.equals("es")) dictPath = "dictionaries/spanish.txt";
-          else if (lang.equals("fr")) dictPath = "dictionaries/french.txt";
-          
-          java.io.InputStream is = Config.globalConfig().getContext().getAssets().open(dictPath);
+          java.io.InputStream is = null;
+          try {
+              is = Config.globalConfig().getContext().getAssets().open("dictionary.txt");
+          } catch (Exception e) {
+              String lang = java.util.Locale.getDefault().getLanguage();
+              String dictPath = "dictionaries/english.txt";
+              if (lang.equals("es")) dictPath = "dictionaries/spanish.txt";
+              else if (lang.equals("fr")) dictPath = "dictionaries/french.txt";
+              is = Config.globalConfig().getContext().getAssets().open(dictPath);
+          }
           java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(is));
           String line;
           while ((line = reader.readLine()) != null) {

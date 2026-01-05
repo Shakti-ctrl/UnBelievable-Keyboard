@@ -230,14 +230,14 @@ public final class KeyEventHandler
     }
   }
 
-  void send_text(String text)
+  public void send_text(String text)
   {
     InputConnection conn = _recv.getCurrentInputConnection();
     if (conn == null)
       return;
     _autocap.typed(text);
     _typedword.typed(text);
-    if (text.endsWith(" ") || text.endsWith("\n") || text.endsWith(".") || text.endsWith(",")) {
+    if (text.endsWith(" ") || text.endsWith("\n") || text.endsWith(".") || text.endsWith(",") || text.endsWith("!") || text.endsWith("?")) {
         String word = _typedword.get().trim();
         if (word.length() >= 2) {
             _suggestions.commit_word(word);
