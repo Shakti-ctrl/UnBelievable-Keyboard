@@ -39,15 +39,7 @@ class Header extends Component {
         </ul>
 
         <div className="inline greeting">
-          {this.props.data.isLoggedIn ? 
-            ( // the user is logged in
-              <button className="btn btn-secondary" onClick={this.props.logoutHandler}>Logout</button>
-            ) : ( // the user is a guest
-            <div>
-              <button className="btn btn-primary" type="button" onClick={() => {this.props.history.push("/login")}}>Login</button>
-            </div>
-            )
-          }
+          {/* Auth buttons removed for immediate access */}
         </div>
       </div>
     </nav>

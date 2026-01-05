@@ -32,10 +32,10 @@ export const PrivateRoute = ({ component: Component, isLoggedIn: isLoggedIn, sho
 export default class UserProvider extends Component {
 
   defaultState = {
-    isLoggedIn: false,
+    isLoggedIn: true,
     userInfo: {
-      jwtToken: null,
-      name: null
+      jwtToken: "guest",
+      name: "Guest User"
     }
   }
 
@@ -48,54 +48,16 @@ export default class UserProvider extends Component {
 
 
   logoutHandler(e){
-    // logout the user
-    localStorage.removeItem('jwtToken');
-    axios.defaults.headers.common['Authorization'] = "";
-    // refresh
-    window.location.reload();
+    // Do nothing for guest mode
   }
 
   loginHandler(data){
-    // console.log("login")
-    // update local state
-    this.setState({
-      isLoggedIn: true,
-      userInfo: {
-        jwtToken: data.jwtToken,
-        name: data.name
-      }
-    });
-    // save jwt token to storage (for future logins)
-    localStorage.setItem('jwtToken', data.jwtToken);
-    axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
+    // Do nothing for guest mode
   }
 
   componentDidMount() { 
-      // check if the user is logged in or not
-      var jwtToken = localStorage.getItem('jwtToken')
-      if(jwtToken){
-        axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-        if(!this.state.isLoggedIn){
-          axios.post('/api/auth/isLoggedIn', {})
-            .then((res) => {
-              // get the training value and put it with state
-              // put the user name into a prop
-              this.setState({
-                  isLoggedIn: true,
-                  userInfo: {
-                    jwtToken: jwtToken,
-                    name: res.data.name
-                  }
-              });
-            }).catch((error) => {
-              // console.log(error)
-              if(error.response && error.response.status === 401) {
-                console.log("error", error.response)
-              }
-            });
-        }
-      }
-    }
+      // Registration system removed
+  }
 
   render() {
     return (

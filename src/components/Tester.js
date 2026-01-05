@@ -59,7 +59,8 @@ class Tester extends Component {
       testOver: false,
       timeChoice: this.props.timeChoice,
       testNumber: this.props.testNumber,
-      training: trainingCheck
+      training: trainingCheck,
+      darkMode: localStorage.getItem('darkMode') === 'true'
 
     };
 
@@ -69,7 +70,14 @@ class Tester extends Component {
     this.handleSpaceKey = this.handleSpaceKey.bind(this);
     this.updateTime = this.updateTime.bind(this);
     this.testIsOver = this.testIsOver.bind(this);
+    this.toggleDarkMode = this.toggleDarkMode.bind(this);
     this.loadLargeDictionary();
+  }
+
+  toggleDarkMode() {
+    const newMode = !this.state.darkMode;
+    this.setState({ darkMode: newMode });
+    localStorage.setItem('darkMode', newMode);
   }
 
   loadLargeDictionary() {
@@ -305,13 +313,17 @@ class Tester extends Component {
         </div>
       );
     }
+    const accuracy = Math.floor(((this.state.input.length - this.state.errorCount) / (this.state.input.length || 1)) * 100);
     return (
-      <div className="col-md-10 offset-md-1">
+      <div className={`col-md-10 offset-md-1 ${this.state.darkMode ? 'bg-dark text-white' : ''}`} style={{ padding: '20px', borderRadius: '10px' }}>
         <div className="row">
-          <div className="col-md-9 card bg-light mb-3">
-                <div className="card-header">
+          <div className={`col-md-9 card ${this.state.darkMode ? 'bg-secondary text-white' : 'bg-light'} mb-3`}>
+                <div className="card-header d-flex justify-content-between align-items-center">
                   {this.state.training && <span> Training Test Level {this.props.testNumber+1}</span>}
                   {!this.state.training && <span> Practice Test</span>}
+                  <button className="btn btn-sm btn-outline-info" onClick={this.toggleDarkMode}>
+                    {this.state.darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+                  </button>
                   <div align="right" className="inline-div text-capitalize">Text Difficulty: {this.props.diffu} </div>
                   {this.props.changeTimeHandler?
                     <button type="button" className="btn btn-primary ml-2" onClick={this.props.changeTimeHandler} >Change Time</button>
@@ -319,11 +331,12 @@ class Tester extends Component {
                 </div>
                 <div className="card-body">
                   <div className="card-body">
-            <div className="sampleInnerBox"><span>{this.highlighted()}</span></div>
+            <div className="sampleInnerBox" style={{ fontFamily: 'monospace', lineHeight: '1.6' }}><span>{this.highlighted()}</span></div>
             <div className="display-center sampleTextInput">
             <input
               align="middle"
               className="input"
+              style={{ backgroundColor: this.state.darkMode ? '#333' : '#fff', color: this.state.darkMode ? '#fff' : '#000' }}
               placeholder="Click here to start typing..."
               value={this.state.input}
               onChange={this.handleChange}
@@ -348,19 +361,19 @@ class Tester extends Component {
                   </h5>
                 </div>
               </div>
-              <div className="card text-white bg-secondary mb-3">
-                <div className="card-header">Speed</div>
+              <div className={`card text-white ${this.state.currentSpeed > 40 ? 'bg-success' : 'bg-secondary'} mb-3`}>
+                <div className="card-header">Speed (WPM)</div>
                 <div className="card-body">
                   <h5 className="card-title">
                     {this.state.currentSpeed}
                   </h5>
                 </div>
               </div>
-              <div className="card text-white bg-secondary mb-3">
-                <div className="card-header">Mistyped keystrokes</div>
+              <div className={`card text-white ${accuracy > 90 ? 'bg-success' : 'bg-danger'} mb-3`}>
+                <div className="card-header">Accuracy</div>
                 <div className="card-body">
                   <h5 className="card-title">
-                    {this.state.errorCount}
+                    {accuracy}%
                   </h5>
                 </div>
               </div>
