@@ -73,6 +73,11 @@ public final class Suggestions
       }
   }
 
+  public static interface Callback
+  {
+    public void set_suggestions(List<String> suggestions);
+  }
+
   static final List<String> NO_SUGGESTIONS = Arrays.asList();
 
   public void commit_word(String word) {
