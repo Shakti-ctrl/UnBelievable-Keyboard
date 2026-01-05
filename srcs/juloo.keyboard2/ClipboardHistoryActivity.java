@@ -18,43 +18,82 @@ public class ClipboardHistoryActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
+            // Apply a basic material theme to ensure UI consistency
+            setTheme(android.R.style.Theme_Material_Light_NoActionBar);
+            
             setContentView(R.layout.clipboard_history_activity);
             
+            // Check if service is initialized. If not, try to initialize it.
             service = ClipboardHistoryService.get_service(this);
             if (service == null) {
-                showError("Clipboard service is null. Make sure the keyboard is enabled.");
+                // If the service is null, it usually means VERSION.SDK_INT <= 11 or internal state issue.
+                // We attempt to trigger initialization manually for the activity context.
+                ClipboardHistoryService.on_startup(getApplicationContext(), null);
+                service = ClipboardHistoryService.get_service(this);
+            }
+            
+            if (service == null) {
+                showError("Clipboard Service could not be initialized.\n\nPlease ensure Unexpected Keyboard is enabled in Settings > System > Languages & Input.");
                 return;
             }
+
             listView = findViewById(R.id.clipboard_history_list);
+            if (listView == null) {
+                showError("UI Error: ListView not found in layout.");
+                return;
+            }
             
             updateList();
 
-            findViewById(R.id.btn_add_new).setOnClickListener(v -> showAddDialog());
-            findViewById(R.id.btn_export_history).setOnClickListener(v -> exportHistory());
-        } catch (Exception e) {
-            showError("Crash during startup: " + e.getMessage() + "\n\nStack Trace:\n" + android.util.Log.getStackTraceString(e));
+            View btnAdd = findViewById(R.id.btn_add_new);
+            if (btnAdd != null) btnAdd.setOnClickListener(v -> showAddDialog());
+            
+            View btnExport = findViewById(R.id.btn_export_history);
+            if (btnExport != null) btnExport.setOnClickListener(v -> exportHistory());
+            
+        } catch (Throwable t) {
+            // Catching Throwable to include Errors and RuntimeExceptions
+            String errorMsg = "Critical failure on startup.\n\nType: " + t.getClass().getName() + "\nMessage: " + t.getMessage();
+            android.util.Log.e("ClipboardActivity", errorMsg, t);
+            showError(errorMsg + "\n\nStack Trace:\n" + android.util.Log.getStackTraceString(t));
         }
     }
 
     private void showError(String message) {
-        TextView tv = new TextView(this);
-        tv.setText(message);
-        tv.setPadding(32, 32, 32, 32);
-        tv.setTextIsSelectable(true);
-        ScrollView sv = new ScrollView(this);
-        sv.addView(tv);
-        
-        Button copyBtn = new Button(this);
-        copyBtn.setText("Copy Error");
-        copyBtn.setOnClickListener(v -> {
-            android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
-            cm.setPrimaryClip(android.content.ClipData.newPlainText("Error Log", message));
-            Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
-        });
+        android.util.Log.e("ClipboardActivity", "Showing error UI: " + message);
         
         LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
+        ll.setBackgroundColor(0xFFFFFFFF); // White background
+        ll.setPadding(48, 48, 48, 48);
+        
+        TextView title = new TextView(this);
+        title.setText("Error Details");
+        title.setTextSize(22);
+        title.setTextColor(0xFFFF0000); // Red
+        title.setPadding(0, 0, 0, 32);
+        ll.addView(title);
+
+        Button copyBtn = new Button(this);
+        copyBtn.setText("Copy Error to Clipboard");
+        copyBtn.setOnClickListener(v -> {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+            if (cm != null) {
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Error Log", message));
+                Toast.makeText(this, "Copied!", Toast.LENGTH_SHORT).show();
+            }
+        });
         ll.addView(copyBtn);
+
+        ScrollView sv = new ScrollView(this);
+        TextView tv = new TextView(this);
+        tv.setText(message);
+        tv.setTextSize(14);
+        tv.setTextColor(0xFF333333); // Dark Gray
+        tv.setPadding(0, 32, 0, 0);
+        tv.setTextIsSelectable(true);
+        sv.addView(tv);
+        
         ll.addView(sv);
         
         setContentView(ll);
