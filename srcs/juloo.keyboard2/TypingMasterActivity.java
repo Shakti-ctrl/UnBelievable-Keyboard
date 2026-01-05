@@ -33,8 +33,8 @@ public class TypingMasterActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         
-        // Loading the official web version of Open-Typer
-        webView.loadUrl("https://open-typer.github.io/Open-Typer/");
+        // Loading the new version of TypingMaster as requested
+        webView.loadUrl("https://createdbyfahad.github.io/TypingMaster/");
         
         setContentView(webView);
     }

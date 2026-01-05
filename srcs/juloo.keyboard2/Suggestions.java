@@ -34,14 +34,14 @@ public final class Suggestions
     // Prefix matching from our word list
     if (dictionary != null) {
         for (String dictWord : dictionary) {
-            if (dictWord.startsWith(lowerWord)) {
+            if (dictWord.toLowerCase().startsWith(lowerWord)) {
                 matches.add(dictWord);
-                if (matches.size() >= 5) break;
+                if (matches.size() >= 10) break;
             }
         }
     }
 
-    // Always include the literal word if not already there
+    // High priority: exact match or learned word
     if (!matches.contains(word)) {
         matches.add(0, word);
     }
