@@ -17,15 +17,47 @@ public class ClipboardHistoryActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.clipboard_history_activity);
-        
-        service = ClipboardHistoryService.get_service(this);
-        listView = findViewById(R.id.clipboard_history_list);
-        
-        updateList();
+        try {
+            setContentView(R.layout.clipboard_history_activity);
+            
+            service = ClipboardHistoryService.get_service(this);
+            if (service == null) {
+                showError("Clipboard service is null. Make sure the keyboard is enabled.");
+                return;
+            }
+            listView = findViewById(R.id.clipboard_history_list);
+            
+            updateList();
 
-        findViewById(R.id.btn_add_new).setOnClickListener(v -> showAddDialog());
-        findViewById(R.id.btn_export_history).setOnClickListener(v -> exportHistory());
+            findViewById(R.id.btn_add_new).setOnClickListener(v -> showAddDialog());
+            findViewById(R.id.btn_export_history).setOnClickListener(v -> exportHistory());
+        } catch (Exception e) {
+            showError("Crash during startup: " + e.getMessage() + "\n\nStack Trace:\n" + android.util.Log.getStackTraceString(e));
+        }
+    }
+
+    private void showError(String message) {
+        TextView tv = new TextView(this);
+        tv.setText(message);
+        tv.setPadding(32, 32, 32, 32);
+        tv.setTextIsSelectable(true);
+        ScrollView sv = new ScrollView(this);
+        sv.addView(tv);
+        
+        Button copyBtn = new Button(this);
+        copyBtn.setText("Copy Error");
+        copyBtn.setOnClickListener(v -> {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("Error Log", message));
+            Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+        });
+        
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ll.addView(copyBtn);
+        ll.addView(sv);
+        
+        setContentView(ll);
     }
 
     private void updateList() {
