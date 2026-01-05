@@ -61,8 +61,8 @@ class App extends Component {
   const LoginWithAuth = withAuth(Login)
     return (
       <MyProvider>
-      <div>
-        <BrowserRouter>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+        <BrowserRouter basename="/android_asset/typing_master">
           <div className="container-fluid p-0">
             <HeaderWithRouter data={this.state} logoutHandler={this.props.user.logoutHandler} errorMsg={this.props.user.state.errorMsg}/>
             <Route exact path="/" render={(props) => (
