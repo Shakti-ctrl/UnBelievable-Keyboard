@@ -2,6 +2,11 @@ package juloo.keyboard2;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -9,11 +14,28 @@ public class TypingMasterActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Fullscreen mode
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
+                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         WebView webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        
         webView.setWebViewClient(new WebViewClient());
-        // Loading the web version of Open-Typer as a typing tutor section
-        webView.loadUrl("https://open-typer.github.io/");
+        webView.setWebChromeClient(new WebChromeClient());
+        
+        // Loading the official web version of Open-Typer
+        webView.loadUrl("https://open-typer.github.io/Open-Typer/");
+        
         setContentView(webView);
     }
 }
