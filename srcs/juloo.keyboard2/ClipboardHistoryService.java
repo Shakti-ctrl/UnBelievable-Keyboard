@@ -66,18 +66,15 @@ public final class ClipboardHistoryService
     _cm.addPrimaryClipChangedListener(this.new SystemListener());
   }
 
+  public synchronized List<HistoryEntry> get_history_entries() {
+    return new ArrayList<>(_history);
+  }
+
   public synchronized List<String> clear_expired_and_get_history()
   {
-    long now_ms = System.currentTimeMillis();
     List<String> dst = new ArrayList<String>();
-    Iterator<HistoryEntry> it = _history.iterator();
-    while (it.hasNext())
-    {
-      HistoryEntry ent = it.next();
-      if (ent.expiry_timestamp <= now_ms)
-        it.remove();
-      else
-        dst.add(ent.content);
+    for (HistoryEntry ent : _history) {
+      dst.add(ent.content);
     }
     return dst;
   }
@@ -109,82 +106,68 @@ public final class ClipboardHistoryService
 
   /** Add clipboard entries to the history, skipping consecutive duplicates and
       empty strings. */
-  public synchronized void add_clip(String clip)
-  {
+  public synchronized void add_clip(String clip) {
+    add_clip_with_metadata(clip, "", "");
+  }
+
+  public synchronized void add_clip_with_metadata(String clip, String description, String version) {
     if (!Config.globalConfig().clipboard_history_enabled)
       return;
-    int size = _history.size();
-    if (clip.equals("") || (size > 0 && _history.get(size - 1).content.equals(clip)))
+    if (clip.equals(""))
       return;
-    if (size >= MAX_HISTORY_SIZE)
-      _history.remove(0);
-    _history.add(new HistoryEntry(clip));
+    
+    String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+    _history.add(new HistoryEntry(clip, timestamp, description, version));
+    
+    save_history_to_prefs(juloo.keyboard2.Config.globalConfig().getContext());
     if (_listener != null)
       _listener.on_clipboard_history_change();
   }
 
-  public synchronized void clear_history()
-  {
-    _history.clear();
-    if (_listener != null)
-      _listener.on_clipboard_history_change();
-  }
-
-  public void set_on_clipboard_history_change(OnClipboardHistoryChange l) { _listener = l; }
-
-  public static interface OnClipboardHistoryChange
-  {
-    public void on_clipboard_history_change();
-  }
-
-  /** Add what is currently in the system clipboard into the history. */
-  void add_current_clip()
-  {
-    ClipData clip = null;
-    // getPrimaryClip might throw when the keyboard is disconnected.
-    try { clip = _cm.getPrimaryClip(); } catch (Exception _e) {}
-    if (clip == null)
-      return;
-    int count = clip.getItemCount();
-    for (int i = 0; i < count; i++)
-    {
-      CharSequence text = clip.getItemAt(i).getText();
-      if (text != null)
-        add_clip(text.toString());
+  private void load_history_from_prefs(Context ctx) {
+    android.content.SharedPreferences prefs = ctx.getSharedPreferences("clipboard_history_v2", Context.MODE_PRIVATE);
+    int size = prefs.getInt("size", 0);
+    for (int i = 0; i < size; i++) {
+      String content = prefs.getString("item_" + i, null);
+      String time = prefs.getString("time_" + i, "");
+      String desc = prefs.getString("desc_" + i, "");
+      String ver = prefs.getString("ver_" + i, "");
+      if (content != null) {
+        _history.add(new HistoryEntry(content, time, desc, ver));
+      }
     }
   }
 
-  int get_history_ttl_minutes() {
-    return Config.globalConfig().clipboard_history_duration;
-  }
-
-  final class SystemListener implements ClipboardManager.OnPrimaryClipChangedListener
-  {
-    public SystemListener() {}
-
-    @Override
-    public void onPrimaryClipChanged()
-    {
-      add_current_clip();
+  private void save_history_to_prefs(Context ctx) {
+    if (ctx == null) return;
+    android.content.SharedPreferences.Editor editor = ctx.getSharedPreferences("clipboard_history_v2", Context.MODE_PRIVATE).edit();
+    editor.clear();
+    editor.putInt("size", _history.size());
+    for (int i = 0; i < _history.size(); i++) {
+      HistoryEntry ent = _history.get(i);
+      editor.putString("item_" + i, ent.content);
+      editor.putString("time_" + i, ent.timestamp);
+      editor.putString("desc_" + i, ent.description);
+      editor.putString("ver_" + i, ent.version);
     }
+    editor.apply();
   }
 
   static final class HistoryEntry
   {
     public final String content;
-
-    /** Time at which the entry expires. */
+    public final String timestamp;
+    public final String description;
+    public final String version;
     public final long expiry_timestamp;
 
-    public HistoryEntry(String c)
+    public HistoryEntry(String c, String time, String desc, String ver)
     {
       content = c;
-        final int historyTtlMinutes = _service.get_history_ttl_minutes();
-        if (historyTtlMinutes >= 0) {
-            expiry_timestamp = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(historyTtlMinutes);
-        } else {
-            expiry_timestamp = Long.MAX_VALUE;
-        }
+      timestamp = time;
+      description = desc;
+      version = ver;
+      expiry_timestamp = Long.MAX_VALUE;
     }
   }
 
