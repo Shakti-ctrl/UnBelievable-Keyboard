@@ -185,7 +185,7 @@ public class ClipboardHistoryActivity extends Activity {
         descInput.setHint("Description");
         
         Spinner spinner = new Spinner(this);
-        String[] formats = {".txt", ".pdf", ".js", ".java", ".html"};
+        String[] formats = {".txt", ".pdf"};
         ArrayAdapter<String> spinAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, formats);
         spinner.setAdapter(spinAdapter);
 
@@ -207,9 +207,75 @@ public class ClipboardHistoryActivity extends Activity {
                 service.add_clip_with_metadata(text, desc, "1");
                 updateList();
                 
-                Toast.makeText(this, "Saved as " + ext, Toast.LENGTH_SHORT).show();
+                if (ext.equals(".pdf")) {
+                    exportAsPdf(text, desc);
+                } else {
+                    exportAsTxt(text, desc);
+                }
             })
             .show();
+    }
+
+    private void exportAsTxt(String text, String desc) {
+        String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+        String content = "Time: " + timestamp + "\nDescription: " + desc + "\nContent: " + text;
+        try {
+            java.io.File file = new java.io.File(getExternalFilesDir(null), "note_" + System.currentTimeMillis() + ".txt");
+            java.io.FileWriter writer = new java.io.FileWriter(file);
+            writer.write(content);
+            writer.close();
+            shareFile(file, "text/plain");
+        } catch (Exception e) {
+            Toast.makeText(this, "Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void exportAsPdf(String text, String desc) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
+            Toast.makeText(this, "PDF export requires Android 4.4+", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            android.graphics.pdf.PdfDocument document = new android.graphics.pdf.PdfDocument();
+            android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, 842, 1).create();
+            android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
+            android.graphics.Canvas canvas = page.getCanvas();
+            android.graphics.Paint paint = new android.graphics.Paint();
+            paint.setTextSize(12);
+            
+            int x = 50, y = 50;
+            String timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+            
+            canvas.drawText("Time: " + timestamp, x, y, paint); y += 20;
+            canvas.drawText("Description: " + desc, x, y, paint); y += 30;
+            
+            paint.setTextSize(10);
+            String[] lines = text.split("\n");
+            for (String line : lines) {
+                canvas.drawText(line, x, y, paint);
+                y += 15;
+                if (y > 800) break; 
+            }
+            
+            document.finishPage(page);
+            java.io.File file = new java.io.File(getExternalFilesDir(null), "note_" + System.currentTimeMillis() + ".pdf");
+            java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+            document.writeTo(fos);
+            document.close();
+            fos.close();
+            shareFile(file, "application/pdf");
+        } catch (Exception e) {
+            Toast.makeText(this, "PDF Export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void shareFile(java.io.File file, String mimeType) {
+        android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(this, "juloo.keyboard2.provider", file);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType(mimeType);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(intent, "Download/Export Note"));
     }
 
     private void exportHistory() {
@@ -231,7 +297,7 @@ public class ClipboardHistoryActivity extends Activity {
             writer.write(sb.toString());
             writer.close();
 
-            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(this, "juloo.keyboard2.provider", file);
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_STREAM, uri);
