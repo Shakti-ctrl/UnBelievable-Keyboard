@@ -25,17 +25,16 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.4",
+    "react-scripts": "^1.1.4",
     "recharts": "^1.0.0-beta.10",
     "serve-favicon": "^2.5.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start_server": "nodemon ./server/bin/www",
+    "start": "PORT=5000 react-scripts start",
+    "start_server": "PORT=5001 nodemon ./server/bin/www",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
-    "dev": "concurrently --kill-others-on-fail  \"npm start\" \"npm run start_server\""
+    "dev": "concurrently --kill-others-on-fail \"npm start\" \"npm run start_server\""
   },
   "devDependencies": {
     "bootstrap": "^4.1.2"

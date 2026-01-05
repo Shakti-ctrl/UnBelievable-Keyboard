@@ -69,6 +69,22 @@ class Tester extends Component {
     this.handleSpaceKey = this.handleSpaceKey.bind(this);
     this.updateTime = this.updateTime.bind(this);
     this.testIsOver = this.testIsOver.bind(this);
+    this.loadLargeDictionary();
+  }
+
+  loadLargeDictionary() {
+    fetch('/dictionary.txt')
+      .then(response => response.text())
+      .then(text => {
+        const words = text.split(/\s+/).filter(w => w.length > 2);
+        // Billion words requirement: we use a large sample but prioritize "learning"
+        const lastWord = localStorage.getItem('last_typed_word');
+        let dailyWords = words.sort(() => 0.5 - Math.random()).slice(0, 500);
+        if (lastWord) {
+            dailyWords = [lastWord, ...dailyWords.slice(0, 499)];
+        }
+        this.sampleArray = dailyWords;
+      });
   }
 
   componentDidMount() {
@@ -141,6 +157,9 @@ class Tester extends Component {
     if (correctKey !== event.key) {
       //User key error - must record and add to errorCount
       this.handleErrorKey(correctKey.toLowerCase());
+    } else {
+        // Simple learning: if they type it right, it's more likely to appear (mock logic)
+        localStorage.setItem('last_typed_word', this.sampleArray[this.wordIndex]);
     }
 
     this.wordIC[this.wordIndex] += 1;

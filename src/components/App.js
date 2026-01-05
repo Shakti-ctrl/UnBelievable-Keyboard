@@ -63,7 +63,7 @@ class App extends Component {
       <MyProvider>
       <div>
         <BrowserRouter>
-          <div className="container">
+          <div className="container-fluid p-0">
             <HeaderWithRouter data={this.state} logoutHandler={this.props.user.logoutHandler} errorMsg={this.props.user.state.errorMsg}/>
             <Route exact path="/" render={(props) => (
               <div>
