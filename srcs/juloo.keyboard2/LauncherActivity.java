@@ -49,6 +49,13 @@ public class LauncherActivity extends Activity implements Handler.Callback
             startActivity(intent);
         });
     }
+    View btnTypingMaster = findViewById(R.id.btn_typing_master);
+    if (btnTypingMaster != null) {
+        btnTypingMaster.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TypingMasterActivity.class);
+            startActivity(intent);
+        });
+    }
   }
 
   @Override

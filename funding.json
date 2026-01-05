@@ -3,11 +3,11 @@
   "entity": {
     "type": "individual",
     "role": "owner",
-    "name": "Julow",
-    "email": "jules@j3s.fr",
-    "description": "Open source developer and maintainer of Unexpected Keyboard.",
+    "name": "Shakti",
+    "email": "shakti@example.com",
+    "description": "Maintainer of Advanced Digital Keyboard.",
     "webpageUrl": {
-      "url": "https://github.com/Julow"
+      "url": "https://github.com/Shakti-ctrl"
     }
   },
   "projects": [
@@ -16,10 +16,10 @@
       "name": "Unexpected Keyboard",
       "description": "Lightweight and privacy-conscious virtual keyboard for Android.",
       "webpageUrl": {
-        "url": "https://github.com/Julow/Unexpected-Keyboard/"
+        "url": "https://github.com/Shakti-ctrl/UnBelievable-Keyboard/"
       },
       "repositoryUrl": {
-        "url": "https://github.com/Julow/Unexpected-Keyboard/"
+        "url": "https://github.com/Shakti-ctrl/UnBelievable-Keyboard/"
       },
       "licenses": [
         "spdx:GPL-3.0",
