@@ -5,220 +5,168 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Random;
 
 public class TypingMasterActivity extends Activity {
+
+    private TextView tvTarget, tvStats, tvLevelInfo;
+    private EditText etInput;
+    private int currentLevel = 1;
+    private int wordsTyped = 0;
+    private long startTime = 0;
+    private String currentTargetWord = "";
+    private int mistakes = 0;
+    private boolean isTestRunning = false;
+
+    private static final String[][] LEVEL_WORDS = {
+        {"the", "be", "to", "of", "and", "in", "that", "have"}, // Level 1
+        {"rhythm", "flow", "typing", "master", "speed", "quick"}, // Level 2
+        {"complex", "challenge", "accuracy", "practice", "mobile"}, // Level 3
+        {"performance", "consistency", "neuroscience", "keyboard"}, // Level 4
+        {"competitive", "excellence", "professional", "optimization"} // Level 5
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+        setupTrainingUI();
+    }
+
+    private void setupTrainingUI() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.parseColor("#121212"));
-        root.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        root.setPadding(40, 40, 40, 40);
 
-        // Header
-        TextView header = new TextView(this);
-        header.setText("ELITE MOBILE TYPING COACH");
-        header.setTextSize(22);
-        header.setTextColor(Color.parseColor("#00E5FF"));
-        header.setTypeface(Typeface.DEFAULT_BOLD);
-        header.setGravity(Gravity.CENTER);
-        header.setPadding(0, 50, 0, 50);
-        root.addView(header);
+        tvLevelInfo = new TextView(this);
+        tvLevelInfo.setTextColor(Color.parseColor("#00E5FF"));
+        tvLevelInfo.setTextSize(18);
+        tvLevelInfo.setGravity(Gravity.CENTER);
+        updateLevelDisplay();
+        root.addView(tvLevelInfo);
 
-        // Content
-        ExpandableListView expandableListView = new ExpandableListView(this);
-        expandableListView.setGroupIndicator(null);
-        expandableListView.setDividerHeight(1);
-        expandableListView.setDivider(null);
-        
-        List<String> listDataHeader = new ArrayList<>();
-        HashMap<String, List<String>> listDataChild = new HashMap<>();
+        tvStats = new TextView(this);
+        tvStats.setTextColor(Color.WHITE);
+        tvStats.setTextSize(16);
+        tvStats.setGravity(Gravity.CENTER);
+        tvStats.setText("WPM: 0 | Accuracy: 100%");
+        root.addView(tvStats);
 
-        // 1. Foundation
-        listDataHeader.add("1️⃣ FOUNDATION (STARTUP LEVEL)");
-        List<String> sec1 = new ArrayList<>();
-        sec1.add("• Mechanics: Thumb-only vs Hybrid styles.");
-        sec1.add("• Placement: Precise QWERTY thumb zones.");
-        sec1.add("• Grip: Scaling reach based on phone size.");
-        sec1.add("• Warm-up: 30s thumb stretch & finger flex.");
-        listDataChild.put(listDataHeader.get(0), sec1);
+        tvTarget = new TextView(this);
+        tvTarget.setTextColor(Color.parseColor("#00E5FF"));
+        tvTarget.setTextSize(32);
+        tvTarget.setTypeface(null, Typeface.BOLD);
+        tvTarget.setGravity(Gravity.CENTER);
+        tvTarget.setPadding(0, 100, 0, 100);
+        root.addView(tvTarget);
 
-        // 2. Placement
-        listDataHeader.add("2️⃣ FINGER & THUMB PLACEMENT");
-        List<String> sec2 = new ArrayList<>();
-        sec2.add("• Home Zones: Neutral resting positions.");
-        sec2.add("• Arc Training: Short vs Diagonal reach.");
-        sec2.add("• Edge Keys: Efficient Q, P, Z, M targeting.");
-        sec2.add("• Mastery: Backspace & Punctuation flow.");
-        listDataChild.put(listDataHeader.get(1), sec2);
+        etInput = new EditText(this);
+        etInput.setHint("Type here...");
+        etInput.setHintTextColor(Color.GRAY);
+        etInput.setTextColor(Color.WHITE);
+        etInput.setGravity(Gravity.CENTER);
+        etInput.setBackgroundColor(Color.parseColor("#1E1E1E"));
+        etInput.setPadding(20, 40, 20, 40);
+        root.addView(etInput);
 
-        // 3. Speed Phases
-        listDataHeader.add("3️⃣ SPEED BUILDING PHASES");
-        List<String> sec3 = new ArrayList<>();
-        sec3.add("• L1 Accuracy: 20 WPM / 98% Acc (Slow Drills)");
-        sec3.add("• L2 Rhythm: 35 WPM / 95% Acc (Flow Typing)");
-        sec3.add("• L3 Bursts: 50 WPM / 90% Acc (Timed Sprints)");
-        sec3.add("• L4 Fatigue: 65 WPM / 90% Acc (Endurance)");
-        sec3.add("• L5 Elite: 80+ WPM / 85% Acc (Chat Sims)");
-        listDataChild.put(listDataHeader.get(2), sec3);
+        etInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                checkInput(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
-        // 4. Hardcore Drills
-        listDataHeader.add("4️⃣ HARDCORE DRILLS (ADVANCED)");
-        List<String> sec4 = new ArrayList<>();
-        sec4.add("• Bigrams/Trigrams: 'th', 'ing', 'ion', 'est'.");
-        sec4.add("• Alternating: Left-Right thumb switch speed.");
-        sec4.add("• No-Look: Muscle memory blind drills.");
-        sec4.add("• Chaos: Random string recovery speed.");
-        listDataChild.put(listDataHeader.get(3), sec4);
-
-        // 5. Pro Techniques
-        listDataHeader.add("5️⃣ THUMB TECHNIQUES (PRO LEVEL)");
-        List<String> sec5 = new ArrayList<>();
-        sec5.add("• Minimization: Tiny micro-movements only.");
-        sec5.add("• Predictive: Pre-positioning for next key.");
-        sec5.add("• Bounce: Kinetic energy transfer taps.");
-        sec5.add("• Glide vs Tap: Strategic speed switching.");
-        listDataChild.put(listDataHeader.get(4), sec5);
-
-        // 6. Metrics
-        listDataHeader.add("6️⃣ TESTING & METRICS");
-        List<String> sec6 = new ArrayList<>();
-        sec6.add("• Formula: (Chars/5) / (Time/60) = WPM.");
-        sec6.add("• Real Acc: Zero-penalty error tracking.");
-        sec6.add("• Fatigue: Speed drop-off index analysis.");
-        listDataChild.put(listDataHeader.get(5), sec6);
-
-        // 7. Real-World
-        listDataHeader.add("7️⃣ REAL-WORLD APPLICATION");
-        List<String> sec7 = new ArrayList<>();
-        sec7.add("• Simulation: WhatsApp & Telegram chat flow.");
-        sec7.add("• Coding: Brackets & Special char speed.");
-        sec7.add("• Exams: Long-form structural typing.");
-        listDataChild.put(listDataHeader.get(6), sec7);
-
-        // 8. Mental
-        listDataHeader.add("8️⃣ MENTAL & NEURO TRAINING");
-        List<String> sec8 = new ArrayList<>();
-        sec8.add("• Focus: Tunnel vision typing concentration.");
-        sec8.add("• Neuro: 21-Day habit formation ritual.");
-        sec8.add("• Motor: Synaptic link speed building.");
-        listDataChild.put(listDataHeader.get(7), sec8);
-
-        // 9. Advanced Tips
-        listDataHeader.add("9️⃣ ADVANCED TIPS & SECRETS");
-        List<String> sec9 = new ArrayList<>();
-        sec9.add("• Height: Vertical layout optimization.");
-        sec9.add("• Haptics: Audio/Vibration feedback sync.");
-        sec9.add("• Posture: Wrist angle for 0-strain speed.");
-        listDataChild.put(listDataHeader.get(8), sec9);
-
-        expandableListView.setAdapter(new ExpandableListAdapter(this, listDataHeader, listDataChild));
-        root.addView(expandableListView);
+        Button btnRestart = new Button(this);
+        btnRestart.setText("RESTART LEVEL");
+        btnRestart.setBackgroundColor(Color.parseColor("#00E5FF"));
+        btnRestart.setTextColor(Color.BLACK);
+        btnRestart.setOnClickListener(v -> startTest());
+        root.addView(btnRestart);
 
         setContentView(root);
+        startTest();
     }
 
-    class ExpandableListAdapter extends BaseExpandableListAdapter {
-        private Context context;
-        private List<String> listDataHeader;
-        private HashMap<String, List<String>> listDataChild;
+    private void startTest() {
+        isTestRunning = true;
+        wordsTyped = 0;
+        mistakes = 0;
+        startTime = System.currentTimeMillis();
+        nextWord();
+        etInput.setText("");
+        etInput.requestFocus();
+    }
 
-        public ExpandableListAdapter(Context context, List<String> listDataHeader, HashMap<String, List<String>> listChildData) {
-            this.context = context;
-            this.listDataHeader = listDataHeader;
-            this.listDataChild = listChildData;
-        }
+    private void nextWord() {
+        String[] words = LEVEL_WORDS[currentLevel - 1];
+        currentTargetWord = words[new Random().nextInt(words.length)];
+        tvTarget.setText(currentTargetWord);
+    }
 
-        @Override
-        public Object getChild(int groupPosition, int childPosititon) {
-            return this.listDataChild.get(this.listDataHeader.get(groupPosition)).get(childPosititon);
-        }
+    private void checkInput(String input) {
+        if (!isTestRunning) return;
 
-        @Override
-        public long getChildId(int groupPosition, int childPosition) {
-            return childPosition;
-        }
-
-        @Override
-        public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            final String childText = (String) getChild(groupPosition, childPosition);
-            if (convertView == null) {
-                TextView textView = new TextView(this.context);
-                textView.setPadding(60, 20, 40, 20);
-                textView.setTextSize(15);
-                textView.setTextColor(Color.parseColor("#BBBBBB"));
-                convertView = textView;
+        if (input.equals(currentTargetWord + " ") || input.equals(currentTargetWord)) {
+            if (input.endsWith(" ") || input.length() == currentTargetWord.length()) {
+                wordsTyped++;
+                updateStats();
+                etInput.setText("");
+                if (wordsTyped >= 10) {
+                    completeLevel();
+                } else {
+                    nextWord();
+                }
             }
-            ((TextView) convertView).setText(childText);
-            return convertView;
+        } else if (!currentTargetWord.startsWith(input)) {
+            mistakes++;
+            updateStats();
         }
+    }
 
-        @Override
-        public int getChildrenCount(int groupPosition) {
-            return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+    private void updateStats() {
+        long elapsed = System.currentTimeMillis() - startTime;
+        double minutes = elapsed / 60000.0;
+        int wpm = (int) (wordsTyped / (minutes > 0 ? minutes : 1.0));
+        int accuracy = (int) Math.max(0, 100 - (mistakes * 2));
+        tvStats.setText("WPM: " + wpm + " | Accuracy: " + accuracy + "%");
+    }
+
+    private void updateLevelDisplay() {
+        String info = "LEVEL " + currentLevel + ": ";
+        switch (currentLevel) {
+            case 1: info += "Foundation Drills"; break;
+            case 2: info += "Rhythm Flow"; break;
+            case 3: info += "Speed Burst"; break;
+            case 4: info += "Endurance Pro"; break;
+            case 5: info += "Elite Competitive"; break;
         }
+        tvLevelInfo.setText(info);
+    }
 
-        @Override
-        public Object getGroup(int groupPosition) {
-            return this.listDataHeader.get(groupPosition);
-        }
-
-        @Override
-        public int getGroupCount() {
-            return this.listDataHeader.size();
-        }
-
-        @Override
-        public long getGroupId(int groupPosition) {
-            return groupPosition;
-        }
-
-        @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-            String headerTitle = (String) getGroup(groupPosition);
-            if (convertView == null) {
-                LinearLayout groupLayout = new LinearLayout(this.context);
-                groupLayout.setOrientation(LinearLayout.VERTICAL);
-                groupLayout.setPadding(40, 30, 40, 30);
-                
-                TextView textView = new TextView(this.context);
-                textView.setTypeface(null, Typeface.BOLD);
-                textView.setTextSize(17);
-                textView.setTextColor(Color.parseColor("#00E5FF"));
-                groupLayout.addView(textView);
-                
-                View divider = new View(this.context);
-                divider.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
-                divider.setBackgroundColor(Color.parseColor("#333333"));
-                groupLayout.addView(divider);
-                
-                convertView = groupLayout;
-            }
-            ((TextView) ((LinearLayout)convertView).getChildAt(0)).setText(headerTitle);
-            return convertView;
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return false;
-        }
-
-        @Override
-        public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return true;
+    private void completeLevel() {
+        isTestRunning = false;
+        if (currentLevel < 5) {
+            currentLevel++;
+            updateLevelDisplay();
+            tvTarget.setText("LEVEL COMPLETE!");
+            new Handler().postDelayed(this::startTest, 2000);
+        } else {
+            tvTarget.setText("ELITE MASTER ACHIEVED!");
         }
     }
 }
