@@ -8,17 +8,17 @@
 > Task :processDebugResources
 
 > Task :compileDebugJavaWithJavac
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/KeyEventHandler.java:507: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/KeyEventHandler.java:507: error: cannot find symbol
   public static interface IReceiver extends Suggestions.Callback
                                                        ^
   symbol:   class Callback
   location: class Suggestions
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Suggestions.java:10: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Suggestions.java:10: error: cannot find symbol
   Callback _callback;
   ^
   symbol:   class Callback
   location: class Suggestions
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Suggestions.java:12: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Suggestions.java:12: error: cannot find symbol
   public Suggestions(Callback c)
                      ^
   symbol:   class Callback
@@ -40,7 +40,7 @@ FAILURE: Build failed with an exception.
 Execution failed for task ':compileDebugJavaWithJavac'.
 > Compilation failed; see the compiler output below.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/KeyEventHandler.java:507: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/KeyEventHandler.java:507: error: cannot find symbol
     public static interface IReceiver extends Suggestions.Callback
                                                          ^
     symbol:   class Callback
@@ -48,12 +48,12 @@ Execution failed for task ':compileDebugJavaWithJavac'.
 [Incubating] Problems report is available at: file:///home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/build/reports/problems/problems-report.html
 32 actionable tasks: 32 executed
 Configuration cache entry stored.
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Suggestions.java:10: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Suggestions.java:10: error: cannot find symbol
     Callback _callback;
     ^
     symbol:   class Callback
     location: class Suggestions
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Suggestions.java:12: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Suggestions.java:12: error: cannot find symbol
     public Suggestions(Callback c)
                        ^
     symbol:   class Callback

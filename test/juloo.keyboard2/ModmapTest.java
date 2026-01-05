@@ -1,7 +1,7 @@
-package com.typing.master.pro;
+package juloo.keyboard2;
 
 import android.view.KeyEvent;
-import com.typing.master.pro.*;
+import juloo.keyboard2.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

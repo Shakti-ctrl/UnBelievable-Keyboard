@@ -13,11 +13,11 @@ dependencies {
 }
 
 android {
-  namespace = "com.typing.master.pro"
+  namespace = "juloo.keyboard2"
   compileSdkVersion = "android-35"
 
   defaultConfig {
-    applicationId = "com.typing.master.pro"
+    applicationId = "juloo.keyboard2"
     minSdk = 21
     targetSdk { version = release(35) }
     versionCode = 50
@@ -27,7 +27,7 @@ android {
   sourceSets {
     named("main") {
       manifest.srcFile("AndroidManifest.xml")
-      java.srcDirs("srcs")
+      java.srcDirs("srcs/juloo.keyboard2")
       res.srcDirs("res", "build/generated-resources")
       assets.srcDirs("assets")
     }
@@ -125,7 +125,7 @@ val genMethodXml by tasks.registering(Exec::class) {
 
 val checkKeyboardLayouts by tasks.registering(Exec::class) {
   inputs.dir(projectDir.resolve("srcs/layouts"))
-  inputs.file(projectDir.resolve("srcs/com/typing/master/pro/KeyValue.java"))
+  inputs.file(projectDir.resolve("srcs/juloo.keyboard2/KeyValue.java"))
   outputs.file(projectDir.resolve("check_layout.output"))
   doFirst { println("\nChecking layouts") }
   workingDir = projectDir
@@ -134,7 +134,7 @@ val checkKeyboardLayouts by tasks.registering(Exec::class) {
 
 val compileComposeSequences by tasks.registering(Exec::class) {
   val `in` = projectDir.resolve("srcs/compose")
-  val out = projectDir.resolve("srcs/com/typing/master/pro/ComposeKeyData.java")
+  val out = projectDir.resolve("srcs/juloo.keyboard2/ComposeKeyData.java")
   inputs.dir(`in`)
   outputs.file(out)
   doFirst { println("\nGenerating $out") }
