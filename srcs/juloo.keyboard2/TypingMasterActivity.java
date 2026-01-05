@@ -33,8 +33,7 @@ public class TypingMasterActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
         
-        // Point to the public/index.html served by our local frontend server
-        // Using common Replit domain pattern or localhost if internal
+        // Point to the root level assets
         webView.loadUrl("file:///android_asset/typing_master/index.html");
         
         setContentView(webView);
