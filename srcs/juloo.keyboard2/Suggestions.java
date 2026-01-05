@@ -1,5 +1,6 @@
 package juloo.keyboard2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
@@ -22,8 +23,23 @@ public final class Suggestions
     }
     else
     {
-      // TODO
-      _callback.set_suggestions(Arrays.asList(word));
+      // Basic word suggestion system
+      List<String> suggestions = new ArrayList<>();
+      suggestions.add(word); // Original word
+      
+      // Add from clipboard history if it starts with the word
+      ClipboardHistoryService service = ClipboardHistoryService.get_service(null);
+      if (service != null) {
+          for (ClipboardHistoryService.HistoryEntry entry : service.get_history_entries()) {
+              if (entry.content.toLowerCase().startsWith(word.toLowerCase()) && !entry.content.equals(word)) {
+                  if (!suggestions.contains(entry.content)) {
+                      suggestions.add(entry.content);
+                  }
+              }
+          }
+      }
+      
+      _callback.set_suggestions(suggestions);
     }
   }
 
