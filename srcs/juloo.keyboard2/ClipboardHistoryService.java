@@ -186,7 +186,7 @@ public final class ClipboardHistoryService
     List<String> history = service.clear_expired_and_get_history();
     java.util.Collections.reverse(history); // Get most recent first
     if (history.size() > limit) {
-      return history.subList(0, limit);
+      return new java.util.ArrayList<>(history.subList(0, limit));
     }
     return history;
   }

@@ -48,14 +48,40 @@ class ClipboardRemoteViewsFactory implements RemoteViewsService.RemoteViewsFacto
     @Override
     public RemoteViews getViewAt(int position) {
         RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.clipboard_widget_item);
-        String clip = mClips.get(position);
-        rv.setTextViewText(R.id.clip_text, clip);
+        ClipboardHistoryService.HistoryEntry entry = null;
+        ClipboardHistoryService service = ClipboardHistoryService.get_service(mContext);
+        if (service != null) {
+            List<ClipboardHistoryService.HistoryEntry> entries = service.get_history_entries();
+            java.util.Collections.reverse(entries); // Recent first
+            if (position < entries.size()) {
+                entry = entries.get(position);
+            }
+        }
+
+        String displayContent = "";
+        String fullContent = "";
+        if (entry != null) {
+            fullContent = entry.content;
+            if (entry.description != null && !entry.description.isEmpty()) {
+                displayContent = entry.description;
+            } else {
+                // Get first two lines or a reasonable snippet
+                String[] lines = fullContent.split("\n", 3);
+                if (lines.length > 2) {
+                    displayContent = lines[0] + "\n" + lines[1];
+                } else {
+                    displayContent = fullContent;
+                }
+            }
+        }
+
+        rv.setTextViewText(R.id.clip_text, displayContent);
         
         int colorIndex = position % mColors.length;
         rv.setInt(R.id.clip_container, "setBackgroundColor", Color.parseColor(mColors[colorIndex]));
 
         Bundle extras = new Bundle();
-        extras.putString(ClipboardWidgetProvider.EXTRA_ITEM_TEXT, clip);
+        extras.putString(ClipboardWidgetProvider.EXTRA_ITEM_TEXT, fullContent);
         Intent fillInIntent = new Intent();
         fillInIntent.putExtras(extras);
         rv.setOnClickFillInIntent(R.id.btn_copy, fillInIntent);
