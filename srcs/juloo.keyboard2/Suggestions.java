@@ -42,7 +42,7 @@ public final class Suggestions
     }
 
     // High priority: exact match or learned word
-    if (!matches.contains(word)) {
+    if (!matches.contains(word) && !word.trim().isEmpty()) {
         matches.add(0, word);
     }
     
@@ -77,10 +77,10 @@ public final class Suggestions
           String line;
           while ((line = reader.readLine()) != null) {
               String word = line.split(" ")[0].toLowerCase();
-              if (word.length() > 1) {
+              if (word.length() >= 1) { // Trigger suggestions even for 1-letter words
                   dictionary.add(word);
               }
-              if (dictionary.size() > 100000) break; // Limit for performance
+              if (dictionary.size() > 500000) break; // Increased limit for better coverage
           }
           reader.close();
       } catch (Exception e) {
