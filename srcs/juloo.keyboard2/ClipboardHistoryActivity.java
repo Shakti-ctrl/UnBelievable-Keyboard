@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class ClipboardHistoryActivity extends Activity {
     private ListView listView;
@@ -20,139 +18,124 @@ public class ClipboardHistoryActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
+            // Apply a basic material theme to ensure UI consistency
             setTheme(android.R.style.Theme_Material_Light_NoActionBar);
             
-            LinearLayout mainLayout = new LinearLayout(this);
-            mainLayout.setOrientation(LinearLayout.VERTICAL);
-            mainLayout.setPadding(32, 32, 32, 32);
-            mainLayout.setBackgroundColor(0xFFEEEEEE);
+            setContentView(R.layout.clipboard_history_activity);
             
-            EditText searchBar = new EditText(this);
-            searchBar.setHint("Search clips...");
-            searchBar.setPadding(32, 32, 32, 32);
-            android.graphics.drawable.GradientDrawable searchBg = new android.graphics.drawable.GradientDrawable();
-            searchBg.setColor(0xFFFFFFFF);
-            searchBg.setCornerRadius(16);
-            searchBar.setBackground(searchBg);
-            searchBar.addTextChangedListener(new android.text.TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (adapter != null) adapter.filter(s.toString());
-                }
-                @Override public void afterTextChanged(android.text.Editable s) {}
-            });
-            mainLayout.addView(searchBar);
-            
-            listView = new ListView(this);
-            listView.setDivider(null);
-            listView.setDividerHeight(16);
-            LinearLayout.LayoutParams listLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1);
-            listLp.setMargins(0, 32, 0, 0);
-            listView.setLayoutParams(listLp);
-            mainLayout.addView(listView);
-            
-            setContentView(mainLayout);
-            
+            // Check if service is initialized. If not, try to initialize it.
             service = ClipboardHistoryService.get_service(this);
             if (service == null) {
+                // If the service is null, it usually means VERSION.SDK_INT <= 11 or internal state issue.
+                // We attempt to trigger initialization manually for the activity context.
                 ClipboardHistoryService.on_startup(getApplicationContext(), null);
                 service = ClipboardHistoryService.get_service(this);
             }
             
             if (service == null) {
-                showError("Clipboard Service could not be initialized.");
+                showError("Clipboard Service could not be initialized.\n\nPlease ensure Unexpected Keyboard is enabled in Settings > System > Languages & Input.");
+                return;
+            }
+
+            listView = findViewById(R.id.clipboard_history_list);
+            if (listView == null) {
+                showError("UI Error: ListView not found in layout.");
                 return;
             }
             
             updateList();
+
+            View btnAdd = findViewById(R.id.btn_add_new);
+            if (btnAdd != null) btnAdd.setOnClickListener(v -> showAddDialog());
+            
+            View btnExport = findViewById(R.id.btn_export_history);
+            if (btnExport != null) btnExport.setOnClickListener(v -> exportHistory());
+            
         } catch (Throwable t) {
-            showError(t.getMessage());
+            // Catching Throwable to include Errors and RuntimeExceptions
+            String errorMsg = "Critical failure on startup.\n\nType: " + t.getClass().getName() + "\nMessage: " + t.getMessage();
+            android.util.Log.e("ClipboardActivity", errorMsg, t);
+            showError(errorMsg + "\n\nStack Trace:\n" + android.util.Log.getStackTraceString(t));
         }
     }
 
     private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        android.util.Log.e("ClipboardActivity", "Showing error UI: " + message);
+        
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ll.setBackgroundColor(0xFFFFFFFF); // White background
+        ll.setPadding(48, 48, 48, 48);
+        
+        TextView title = new TextView(this);
+        title.setText("Error Details");
+        title.setTextSize(22);
+        title.setTextColor(0xFFFF0000); // Red
+        title.setPadding(0, 0, 0, 32);
+        ll.addView(title);
+
+        Button copyBtn = new Button(this);
+        copyBtn.setText("Copy Error to Clipboard");
+        copyBtn.setOnClickListener(v -> {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager)getSystemService(android.content.Context.CLIPBOARD_SERVICE);
+            if (cm != null) {
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Error Log", message));
+                Toast.makeText(this, "Copied!", Toast.LENGTH_SHORT).show();
+            }
+        });
+        ll.addView(copyBtn);
+
+        ScrollView sv = new ScrollView(this);
+        TextView tv = new TextView(this);
+        tv.setText(message);
+        tv.setTextSize(14);
+        tv.setTextColor(0xFF333333); // Dark Gray
+        tv.setPadding(0, 32, 0, 0);
+        tv.setTextIsSelectable(true);
+        sv.addView(tv);
+        
+        ll.addView(sv);
+        
+        setContentView(ll);
     }
 
     private void updateList() {
         if (service == null) return;
-        List<ClipboardHistoryService.HistoryEntry> history = new ArrayList<>(service.get_history_entries());
-        Collections.reverse(history);
+        List<ClipboardHistoryService.HistoryEntry> history = service.get_history_entries();
         adapter = new ClipboardAdapter(history);
         listView.setAdapter(adapter);
     }
 
     class ClipboardAdapter extends BaseAdapter {
-        List<ClipboardHistoryService.HistoryEntry> allItems;
-        List<ClipboardHistoryService.HistoryEntry> filteredItems;
-        
-        ClipboardAdapter(List<ClipboardHistoryService.HistoryEntry> items) { 
-            this.allItems = items; 
-            this.filteredItems = new ArrayList<>(items);
-        }
-        
-        void filter(String query) {
-            filteredItems.clear();
-            if (query.isEmpty()) {
-                filteredItems.addAll(allItems);
-            } else {
-                for (ClipboardHistoryService.HistoryEntry item : allItems) {
-                    if (item.content.toLowerCase().contains(query.toLowerCase())) {
-                        filteredItems.add(item);
-                    }
-                }
-            }
-            notifyDataSetChanged();
-        }
-        
-        @Override public int getCount() { return filteredItems.size(); }
-        @Override public Object getItem(int p) { return filteredItems.get(p); }
+        List<ClipboardHistoryService.HistoryEntry> items;
+        ClipboardAdapter(List<ClipboardHistoryService.HistoryEntry> items) { this.items = items; }
+        @Override public int getCount() { return items.size(); }
+        @Override public Object getItem(int p) { return items.get(p); }
         @Override public long getItemId(int p) { return p; }
         @Override public View getView(int p, View v, ViewGroup prnt) {
             if (v == null) {
                 LinearLayout ll = new LinearLayout(ClipboardHistoryActivity.this);
-                ll.setOrientation(LinearLayout.HORIZONTAL);
-                ll.setPadding(32, 32, 32, 32);
-                
-                android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
-                shape.setCornerRadius(24);
-                shape.setColor(0xFFFFFFFF);
-                ll.setBackground(shape);
-                
-                TextView num = new TextView(ClipboardHistoryActivity.this);
-                num.setId(android.R.id.text1);
-                num.setTextSize(18);
-                num.setTypeface(null, android.graphics.Typeface.BOLD);
-                num.setTextColor(0xFF2196F3);
-                num.setPadding(0, 0, 32, 0);
-                
-                LinearLayout vll = new LinearLayout(ClipboardHistoryActivity.this);
-                vll.setOrientation(LinearLayout.VERTICAL);
+                ll.setOrientation(LinearLayout.VERTICAL);
+                ll.setPadding(32, 24, 32, 24);
                 
                 TextView text = new TextView(ClipboardHistoryActivity.this);
-                text.setId(android.R.id.text2);
+                text.setId(android.R.id.text1);
                 text.setTextSize(16);
-                text.setTextColor(0xFF212121);
-                text.setMaxLines(3);
-                text.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                text.setTextColor(0xFF000000);
                 
                 TextView sub = new TextView(ClipboardHistoryActivity.this);
-                sub.setId(android.R.id.hint);
-                sub.setTextSize(11);
-                sub.setTextColor(0xFF9E9E9E);
-                sub.setPadding(0, 8, 0, 0);
+                sub.setId(android.R.id.text2);
+                sub.setTextSize(12);
+                sub.setTextColor(0xFF666666);
                 
-                vll.addView(text);
-                vll.addView(sub);
-                ll.addView(num);
-                ll.addView(vll);
+                ll.addView(text);
+                ll.addView(sub);
                 v = ll;
             }
-            ClipboardHistoryService.HistoryEntry ent = filteredItems.get(p);
-            ((TextView)v.findViewById(android.R.id.text1)).setText("#" + (allItems.indexOf(ent) + 1));
-            ((TextView)v.findViewById(android.R.id.text2)).setText(ent.content);
-            String info = ent.timestamp + (ent.version.isEmpty() ? "" : " • V" + ent.version);
-            ((TextView)v.findViewById(android.R.id.hint)).setText(info);
+            ClipboardHistoryService.HistoryEntry ent = items.get(p);
+            ((TextView)v.findViewById(android.R.id.text1)).setText(ent.content);
+            String info = ent.timestamp + (ent.version.isEmpty() ? "" : " | Ver: " + ent.version) + (ent.description.isEmpty() ? "" : "\n" + ent.description);
+            ((TextView)v.findViewById(android.R.id.text2)).setText(info);
             
             v.setOnClickListener(view -> showEditDialog(ent));
             return v;
@@ -229,6 +212,7 @@ public class ClipboardHistoryActivity extends Activity {
                 } else if (ext.equals(".txt")) {
                     exportAsTxt(text, desc);
                 } else {
+                    // Handle other extensions as generic text files for now
                     exportAsGenericText(text, desc, ext);
                 }
             })
