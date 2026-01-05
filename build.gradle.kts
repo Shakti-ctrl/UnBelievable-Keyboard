@@ -27,7 +27,7 @@ android {
   sourceSets {
     named("main") {
       manifest.srcFile("AndroidManifest.xml")
-      java.srcDirs("srcs/com/typing/master/pro")
+      java.srcDirs("srcs")
       res.srcDirs("res", "build/generated-resources")
       assets.srcDirs("assets")
     }
