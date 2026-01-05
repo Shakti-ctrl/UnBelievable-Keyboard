@@ -101,16 +101,89 @@ public class ClipboardHistoryActivity extends Activity {
 
     private void updateList() {
         if (service == null) return;
-        List<String> history = service.clear_expired_and_get_history();
-        if (history == null) {
-            history = new java.util.ArrayList<>();
-        }
+        List<ClipboardHistoryService.HistoryEntry> history = service.get_history_entries();
         adapter = new ClipboardAdapter(history);
         listView.setAdapter(adapter);
     }
 
+    class ClipboardAdapter extends BaseAdapter {
+        List<ClipboardHistoryService.HistoryEntry> items;
+        ClipboardAdapter(List<ClipboardHistoryService.HistoryEntry> items) { this.items = items; }
+        @Override public int getCount() { return items.size(); }
+        @Override public Object getItem(int p) { return items.get(p); }
+        @Override public long getItemId(int p) { return p; }
+        @Override public View getView(int p, View v, ViewGroup prnt) {
+            if (v == null) {
+                LinearLayout ll = new LinearLayout(ClipboardHistoryActivity.this);
+                ll.setOrientation(LinearLayout.VERTICAL);
+                ll.setPadding(32, 24, 32, 24);
+                
+                TextView text = new TextView(ClipboardHistoryActivity.this);
+                text.setId(android.R.id.text1);
+                text.setTextSize(16);
+                text.setTextColor(0xFF000000);
+                
+                TextView sub = new TextView(ClipboardHistoryActivity.this);
+                sub.setId(android.R.id.text2);
+                sub.setTextSize(12);
+                sub.setTextColor(0xFF666666);
+                
+                ll.addView(text);
+                ll.addView(sub);
+                v = ll;
+            }
+            ClipboardHistoryService.HistoryEntry ent = items.get(p);
+            ((TextView)v.findViewById(android.R.id.text1)).setText(ent.content);
+            String info = ent.timestamp + (ent.version.isEmpty() ? "" : " | Ver: " + ent.version) + (ent.description.isEmpty() ? "" : "\n" + ent.description);
+            ((TextView)v.findViewById(android.R.id.text2)).setText(info);
+            
+            v.setOnClickListener(view -> showEditDialog(ent));
+            return v;
+        }
+    }
+
+    private void showEditDialog(ClipboardHistoryService.HistoryEntry ent) {
+        EditText edit = new EditText(this);
+        edit.setText(ent.content);
+        edit.setHint("Content");
+        
+        EditText desc = new EditText(this);
+        desc.setText(ent.description);
+        desc.setHint("Description");
+        
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(32, 16, 32, 16);
+        layout.addView(edit);
+        layout.addView(desc);
+
+        new AlertDialog.Builder(this)
+            .setTitle("Edit Entry")
+            .setView(layout)
+            .setPositiveButton("Save as Ver 2", (d, w) -> {
+                service.add_clip_with_metadata(edit.getText().toString(), desc.getText().toString(), "2");
+                updateList();
+            })
+            .setNegativeButton("Delete", (d, w) -> {
+                service.remove_history_entry(ent.content);
+                updateList();
+            })
+            .setNeutralButton("Share", (d, w) -> {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, ent.content);
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, null));
+            })
+            .show();
+    }
+
     private void showAddDialog() {
         EditText input = new EditText(this);
+        input.setHint("Content");
+        EditText descInput = new EditText(this);
+        descInput.setHint("Description");
+        
         Spinner spinner = new Spinner(this);
         String[] formats = {".txt", ".pdf", ".js", ".java", ".html"};
         ArrayAdapter<String> spinAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, formats);
@@ -118,7 +191,9 @@ public class ClipboardHistoryActivity extends Activity {
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(32, 16, 32, 16);
         layout.addView(input);
+        layout.addView(descInput);
         layout.addView(spinner);
 
         new AlertDialog.Builder(this)
@@ -126,63 +201,31 @@ public class ClipboardHistoryActivity extends Activity {
             .setView(layout)
             .setPositiveButton("Save", (d, w) -> {
                 String text = input.getText().toString();
+                String desc = descInput.getText().toString();
                 String ext = spinner.getSelectedItem().toString();
-                // Permanent save through the service
-                service.add_clip(text); 
+                
+                service.add_clip_with_metadata(text, desc, "1");
                 updateList();
+                
+                Toast.makeText(this, "Saved as " + ext, Toast.LENGTH_SHORT).show();
             })
             .show();
     }
 
     private void exportHistory() {
         StringBuilder sb = new StringBuilder();
-        List<String> history = service.clear_expired_and_get_history();
-        for (String entry : history) {
-            sb.append(entry).append("\n---\n");
+        List<ClipboardHistoryService.HistoryEntry> history = service.get_history_entries();
+        for (ClipboardHistoryService.HistoryEntry entry : history) {
+            sb.append("Time: ").append(entry.timestamp).append("\n");
+            sb.append("Version: ").append(entry.version).append("\n");
+            sb.append("Description: ").append(entry.description).append("\n");
+            sb.append("Content: ").append(entry.content).append("\n");
+            sb.append("---\n");
         }
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
         sendIntent.setType("text/plain");
         startActivity(Intent.createChooser(sendIntent, "Export History"));
-    }
-
-    class ClipboardAdapter extends BaseAdapter {
-        List<String> items;
-        ClipboardAdapter(List<String> items) { this.items = items; }
-        @Override public int getCount() { return items.size(); }
-        @Override public Object getItem(int p) { return items.get(p); }
-        @Override public long getItemId(int p) { return p; }
-        @Override public View getView(int p, View v, ViewGroup prnt) {
-            if (v == null) v = getLayoutInflater().inflate(android.R.layout.simple_list_item_1, prnt, false);
-            ((TextView)v.findViewById(android.R.id.text1)).setText(items.get(p));
-            v.setOnClickListener(view -> showEditDialog(items.get(p)));
-            return v;
-        }
-    }
-
-    private void showEditDialog(String content) {
-        EditText edit = new EditText(this);
-        edit.setText(content);
-        new AlertDialog.Builder(this)
-            .setTitle("Edit Entry")
-            .setView(edit)
-            .setPositiveButton("Save", (d, w) -> {
-                service.remove_history_entry(content);
-                service.add_clip(edit.getText().toString());
-                updateList();
-            })
-            .setNegativeButton("Delete", (d, w) -> {
-                service.remove_history_entry(content);
-                updateList();
-            })
-            .setNeutralButton("Share", (d, w) -> {
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, content);
-                sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, null));
-            })
-            .show();
     }
 }
