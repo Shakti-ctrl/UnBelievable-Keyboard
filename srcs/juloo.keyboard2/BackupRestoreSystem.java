@@ -22,7 +22,17 @@ public class BackupRestoreSystem {
             SharedPreferences settings = DirectBootAwarePreferences.get_shared_preferences(context);
             org.json.JSONObject settingsJson = new org.json.JSONObject();
             for (Map.Entry<String, ?> entry : settings.getAll().entrySet()) {
-                settingsJson.put(entry.getKey(), entry.getValue());
+                Object value = entry.getValue();
+                // Ensure we handle sets correctly for JSON
+                if (value instanceof java.util.Set) {
+                    org.json.JSONArray setArray = new org.json.JSONArray();
+                    for (Object item : (java.util.Set<?>) value) {
+                        setArray.put(item);
+                    }
+                    settingsJson.put(entry.getKey(), setArray);
+                } else {
+                    settingsJson.put(entry.getKey(), value);
+                }
             }
             backup.put("settings", settingsJson);
 
@@ -65,6 +75,14 @@ public class BackupRestoreSystem {
                     else if (value instanceof Long) editor.putLong(key, (Long) value);
                     else if (value instanceof Float) editor.putFloat(key, (Float) value);
                     else if (value instanceof String) editor.putString(key, (String) value);
+                    else if (value instanceof org.json.JSONArray) {
+                        org.json.JSONArray array = (org.json.JSONArray) value;
+                        java.util.Set<String> set = new java.util.HashSet<>();
+                        for (int i = 0; i < array.length(); i++) {
+                            set.add(array.getString(i));
+                        }
+                        editor.putStringSet(key, set);
+                    }
                 }
                 editor.apply();
             }
