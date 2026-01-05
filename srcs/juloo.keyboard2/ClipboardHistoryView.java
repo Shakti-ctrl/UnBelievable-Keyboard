@@ -55,14 +55,7 @@ public final class ClipboardHistoryView extends NonScrollListView
     update_data();
   }
 
-  @Override
-  protected void onWindowVisibilityChanged(int visibility)
-  {
-    if (visibility == View.VISIBLE)
-      update_data();
-  }
-
-  void update_data()
+  private void update_data()
   {
     _history = _service.clear_expired_and_get_history();
     _adapter.notifyDataSetChanged();

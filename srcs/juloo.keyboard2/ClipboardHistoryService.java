@@ -146,9 +146,11 @@ public final class ClipboardHistoryService
       _listener.on_clipboard_history_change();
   }
 
-  /** Add clipboard entries to the history, skipping consecutive duplicates and
-      empty strings. */
   public synchronized void add_clip(String clip) {
+    // Check for duplicates
+    for (HistoryEntry ent : _history) {
+      if (ent.content.equals(clip)) return;
+    }
     add_clip_with_metadata(clip, "", "");
   }
 

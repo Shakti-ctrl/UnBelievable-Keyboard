@@ -116,6 +116,7 @@ public class Keyboard2 extends InputMethodService
     _keyeventhandler = new KeyEventHandler(this.new Receiver());
     _foldStateTracker = new FoldStateTracker(this);
     Config.initGlobalConfig(prefs, getResources(), _keyeventhandler, _foldStateTracker.isUnfolded());
+    Config.globalConfig().setContext(this);
     prefs.registerOnSharedPreferenceChangeListener(this);
     _config = Config.globalConfig();
     Logs.set_debug_logs(getResources().getBoolean(R.bool.debug_logs));
