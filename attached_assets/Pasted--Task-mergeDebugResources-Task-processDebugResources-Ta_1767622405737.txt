@@ -1,17 +1,17 @@
 > Task :mergeDebugResources
 > Task :processDebugResources
 > Task :compileDebugJavaWithJavac
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:93: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:93: error: cannot find symbol
   private Context _context;
           ^
   symbol:   class Context
   location: class Config
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:95: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:95: error: cannot find symbol
   public void setContext(Context ctx) {
                          ^
   symbol:   class Context
   location: class Config
-/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:99: error: cannot find symbol
+/home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:99: error: cannot find symbol
   public Context getContext() {
          ^
   symbol:   class Context
@@ -30,18 +30,18 @@ FAILURE: Build failed with an exception.
 Execution failed for task ':compileDebugJavaWithJavac'.
 > Compilation failed; see the compiler output below.
   Note: Recompile with -Xlint:deprecation for details.
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:93: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:93: error: cannot find symbol
     private Context _context;
             ^
     symbol:   class Context
     location: class Config
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:95: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:95: error: cannot find symbol
 32 actionable tasks: 32 executed
     public void setContext(Context ctx) {
                            ^
     symbol:   class Context
     location: class Config
-  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/juloo.keyboard2/Config.java:99: error: cannot find symbol
+  /home/runner/work/UnBelievable-Keyboard/UnBelievable-Keyboard/srcs/com.typing.master.pro/Config.java:99: error: cannot find symbol
     public Context getContext() {
            ^
     symbol:   class Context

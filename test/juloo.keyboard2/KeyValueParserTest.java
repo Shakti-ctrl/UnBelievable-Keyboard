@@ -1,7 +1,7 @@
-package juloo.keyboard2;
+package com.typing.master.pro;
 
-import juloo.keyboard2.KeyValue;
-import juloo.keyboard2.KeyValueParser;
+import com.typing.master.pro.KeyValue;
+import com.typing.master.pro.KeyValueParser;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

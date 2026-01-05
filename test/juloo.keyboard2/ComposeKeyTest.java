@@ -1,8 +1,8 @@
-package juloo.keyboard2;
+package com.typing.master.pro;
 
-import juloo.keyboard2.ComposeKey;
-import juloo.keyboard2.ComposeKeyData;
-import juloo.keyboard2.KeyValue;
+import com.typing.master.pro.ComposeKey;
+import com.typing.master.pro.ComposeKeyData;
+import com.typing.master.pro.KeyValue;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
