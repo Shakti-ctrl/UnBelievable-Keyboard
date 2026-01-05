@@ -100,7 +100,11 @@ public class ClipboardHistoryActivity extends Activity {
     }
 
     private void updateList() {
+        if (service == null) return;
         List<String> history = service.clear_expired_and_get_history();
+        if (history == null) {
+            history = new java.util.ArrayList<>();
+        }
         adapter = new ClipboardAdapter(history);
         listView.setAdapter(adapter);
     }

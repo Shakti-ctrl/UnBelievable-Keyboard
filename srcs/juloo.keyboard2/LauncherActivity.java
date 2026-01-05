@@ -42,10 +42,13 @@ public class LauncherActivity extends Activity implements Handler.Callback
       _tryhere_area.addOnUnhandledKeyEventListener(
           this.new Tryhere_OnUnhandledKeyEventListener());
     _handler = new Handler(getMainLooper(), this);
-    findViewById(R.id.btnLaunchSettingsActivity).setOnClickListener(v -> {
-        Intent intent = new Intent(this, ClipboardHistoryActivity.class);
-        startActivity(intent);
-    });
+    View btnClipboard = findViewById(R.id.btn_clipboard_history);
+    if (btnClipboard != null) {
+        btnClipboard.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ClipboardHistoryActivity.class);
+            startActivity(intent);
+        });
+    }
   }
 
   @Override
