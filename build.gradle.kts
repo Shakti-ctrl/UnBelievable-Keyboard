@@ -27,7 +27,7 @@ android {
   sourceSets {
     named("main") {
       manifest.srcFile("AndroidManifest.xml")
-      java.srcDirs("srcs/com.typing.master.pro")
+      java.srcDirs("srcs/com/typing/master/pro")
       res.srcDirs("res", "build/generated-resources")
       assets.srcDirs("assets")
     }
@@ -125,7 +125,7 @@ val genMethodXml by tasks.registering(Exec::class) {
 
 val checkKeyboardLayouts by tasks.registering(Exec::class) {
   inputs.dir(projectDir.resolve("srcs/layouts"))
-  inputs.file(projectDir.resolve("srcs/com.typing.master.pro/KeyValue.java"))
+  inputs.file(projectDir.resolve("srcs/com/typing/master/pro/KeyValue.java"))
   outputs.file(projectDir.resolve("check_layout.output"))
   doFirst { println("\nChecking layouts") }
   workingDir = projectDir
@@ -134,7 +134,7 @@ val checkKeyboardLayouts by tasks.registering(Exec::class) {
 
 val compileComposeSequences by tasks.registering(Exec::class) {
   val `in` = projectDir.resolve("srcs/compose")
-  val out = projectDir.resolve("srcs/com.typing.master.pro/ComposeKeyData.java")
+  val out = projectDir.resolve("srcs/com/typing/master/pro/ComposeKeyData.java")
   inputs.dir(`in`)
   outputs.file(out)
   doFirst { println("\nGenerating $out") }
