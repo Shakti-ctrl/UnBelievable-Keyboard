@@ -90,6 +90,16 @@ public final class Config
   int current_layout_narrow;
   int current_layout_wide;
 
+  private Context _context;
+
+  public void setContext(Context ctx) {
+    _context = ctx;
+  }
+
+  public Context getContext() {
+    return _context;
+  }
+
   private Config(SharedPreferences prefs, Resources res, IKeyEventHandler h, Boolean foldableUnfolded)
   {
     _prefs = prefs;

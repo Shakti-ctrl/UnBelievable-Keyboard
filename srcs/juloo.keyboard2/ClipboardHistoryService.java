@@ -59,11 +59,53 @@ public final class ClipboardHistoryService
   List<HistoryEntry> _history;
   OnClipboardHistoryChange _listener = null;
 
+  public interface OnClipboardHistoryChange
+  {
+    public void on_clipboard_history_change();
+  }
+
+  private final class SystemListener implements ClipboardManager.OnPrimaryClipChangedListener
+  {
+    @Override
+    public void onPrimaryClipChanged()
+    {
+      add_current_clip();
+    }
+  }
+
+  public synchronized void add_current_clip()
+  {
+    if (_cm.hasPrimaryClip())
+    {
+      ClipData cd = _cm.getPrimaryClip();
+      if (cd.getItemCount() > 0)
+      {
+        CharSequence text = cd.getItemAt(0).getText();
+        if (text != null)
+          add_clip(text.toString());
+      }
+    }
+  }
+
+  public synchronized void clear_history()
+  {
+    _history.clear();
+    save_history_to_prefs(juloo.keyboard2.Config.globalConfig().getContext());
+    if (_listener != null)
+      _listener.on_clipboard_history_change();
+  }
+
+  public void set_on_clipboard_history_change(OnClipboardHistoryChange l)
+  {
+    _listener = l;
+  }
+
   ClipboardHistoryService(Context ctx)
   {
     _history = new ArrayList<HistoryEntry>();
     _cm = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-    _cm.addPrimaryClipChangedListener(this.new SystemListener());
+    _cm.addPrimaryClipChangedListener(new SystemListener());
+    load_history_from_prefs(ctx);
   }
 
   public synchronized List<HistoryEntry> get_history_entries() {
