@@ -24,6 +24,28 @@ public class SettingsActivity extends PreferenceActivity
     catch (Exception _e) { fallbackEncrypted(); return; }
     addPreferencesFromResource(R.xml.settings);
 
+    findPreference("backup_data").setOnPreferenceClickListener(p -> {
+        try {
+            String json = juloo.keyboard2.backup.BackupRestoreManager.createBackupJson(this);
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_CREATE_DOCUMENT);
+            intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);
+            intent.setType("application/json");
+            intent.putExtra(android.content.Intent.EXTRA_TITLE, "typing_master_backup.json");
+            startActivityForResult(intent, 1001);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Backup failed", android.widget.Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    });
+
+    findPreference("restore_data").setOnPreferenceClickListener(p -> {
+        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(android.content.Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        startActivityForResult(intent, 1002);
+        return true;
+    });
+
     boolean foldableDevice = FoldStateTracker.isFoldableDevice(this);
     findPreference("margin_bottom_portrait_unfolded").setEnabled(foldableDevice);
     findPreference("margin_bottom_landscape_unfolded").setEnabled(foldableDevice);
@@ -31,6 +53,33 @@ public class SettingsActivity extends PreferenceActivity
     findPreference("horizontal_margin_landscape_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_landscape_unfolded").setEnabled(foldableDevice);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+    if (resultCode != RESULT_OK || data == null || data.getData() == null) return;
+    android.net.Uri uri = data.getData();
+    if (requestCode == 1001) {
+      try {
+        String json = juloo.keyboard2.backup.BackupRestoreManager.createBackupJson(this);
+        android.os.ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "w");
+        java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(pfd.getFileDescriptor());
+        fileOutputStream.write(json.getBytes());
+        fileOutputStream.close();
+        pfd.close();
+        android.widget.Toast.makeText(this, "Backup successful", android.widget.Toast.LENGTH_SHORT).show();
+      } catch (Exception e) {
+        android.widget.Toast.makeText(this, "Backup failed: " + e.getMessage(), android.widget.Toast.LENGTH_LONG).show();
+      }
+    } else if (requestCode == 1002) {
+      if (juloo.keyboard2.backup.BackupRestoreManager.restoreBackup(this, uri)) {
+        android.widget.Toast.makeText(this, "Restore successful! Restarting keyboard...", android.widget.Toast.LENGTH_SHORT).show();
+        // Notify keyboard to refresh
+        Config.globalConfig().refresh(getResources(), FoldStateTracker.isFoldableDevice(this));
+      } else {
+        android.widget.Toast.makeText(this, "Restore failed", android.widget.Toast.LENGTH_SHORT).show();
+      }
+    }
   }
 
   void fallbackEncrypted()

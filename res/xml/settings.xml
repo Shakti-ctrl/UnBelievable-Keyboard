@@ -61,5 +61,9 @@
   </PreferenceCategory>
   <PreferenceCategory android:title="@string/pref_category_clipboard">
     <ListPreference android:key="clipboard_history_duration" android:title="@string/pref_clipboard_history_duration" android:summary="%s" android:defaultValue="5" android:entries="@array/pref_clipboard_duration_entries" android:entryValues="@array/pref_clipboard_duration_values" />
-   </PreferenceCategory>
+  </PreferenceCategory>
+  <PreferenceCategory android:title="Backup &amp; Restore">
+    <Preference android:key="backup_data" android:title="Backup All Data" android:summary="Save settings and clipboard to a file"/>
+    <Preference android:key="restore_data" android:title="Restore All Data" android:summary="Restore settings and clipboard from a file"/>
+  </PreferenceCategory>
 </PreferenceScreen>

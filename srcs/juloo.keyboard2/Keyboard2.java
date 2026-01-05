@@ -257,7 +257,18 @@ public class Keyboard2 extends InputMethodService
     _currentSpecialLayout = refresh_special_layout();
     _keyboardView.setKeyboard(current_layout());
     _keyeventhandler.started(_config);
+    
+    // Ensure the view is visible and properly sized
+    _container_view.setVisibility(View.VISIBLE);
     setInputView(_container_view);
+    
+    _handler.postDelayed(() -> {
+      if (_container_view != null) {
+        _container_view.requestLayout();
+        _container_view.invalidate();
+      }
+    }, 50);
+    
     Logs.debug_startup_input_view(info, _config);
   }
 
