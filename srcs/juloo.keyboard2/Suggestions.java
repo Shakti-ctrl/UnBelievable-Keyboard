@@ -71,11 +71,7 @@ public final class Suggestions
           try {
               is = Config.globalConfig().getContext().getAssets().open("dictionary.txt");
           } catch (Exception e) {
-              String lang = java.util.Locale.getDefault().getLanguage();
-              String dictPath = "dictionaries/english.txt";
-              if (lang.equals("es")) dictPath = "dictionaries/spanish.txt";
-              else if (lang.equals("fr")) dictPath = "dictionaries/french.txt";
-              is = Config.globalConfig().getContext().getAssets().open(dictPath);
+              is = Config.globalConfig().getContext().getAssets().open("dictionaries/english.txt");
           }
           java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(is));
           String line;

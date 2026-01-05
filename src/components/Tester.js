@@ -76,14 +76,14 @@ class Tester extends Component {
     fetch('/dictionary.txt')
       .then(response => response.text())
       .then(text => {
-        const words = text.split(/\s+/).filter(w => w.length > 2);
-        // Billion words requirement: we use a large sample but prioritize "learning"
+        const words = text.split(/\s+/).filter(w => w.length > 1);
         const lastWord = localStorage.getItem('last_typed_word');
-        let dailyWords = words.sort(() => 0.5 - Math.random()).slice(0, 500);
+        // Shuffle and take a large sample for variety
+        let dailyWords = words.sort(() => 0.5 - Math.random());
         if (lastWord) {
-            dailyWords = [lastWord, ...dailyWords.slice(0, 499)];
+            dailyWords = [lastWord, ...dailyWords.filter(w => w !== lastWord)];
         }
-        this.sampleArray = dailyWords;
+        this.sampleArray = dailyWords.slice(0, 1000);
       });
   }
 
