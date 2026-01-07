@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
+import android.preference.Preference;
+import android.widget.Toast;
+import android.content.Intent;
+import android.net.Uri;
+
 public class SettingsActivity extends PreferenceActivity
 {
   @Override
@@ -23,6 +28,40 @@ public class SettingsActivity extends PreferenceActivity
     }
     catch (Exception _e) { fallbackEncrypted(); return; }
     addPreferencesFromResource(R.xml.settings);
+
+    findPreference("backup_data").setOnPreferenceClickListener(p -> {
+        String backup = BackupRestoreSystem.createBackup(this);
+        if (backup != null) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, backup);
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getString(R.string.pref_backup_title)));
+            Toast.makeText(this, R.string.backup_success, Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    });
+
+    findPreference("restore_data").setOnPreferenceClickListener(p -> {
+        // In a real app we'd use a file picker, but to keep it simple and within Replit constraints
+        // we'll use a dialog to paste the backup string or just show how it would be done.
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle(R.string.pref_restore_title);
+        final android.widget.EditText input = new android.widget.EditText(this);
+        builder.setView(input);
+        builder.setPositiveButton("Restore", (dialog, which) -> {
+            if (BackupRestoreSystem.restoreBackup(this, input.getText().toString())) {
+                Toast.makeText(this, R.string.restore_success, Toast.LENGTH_LONG).show();
+                // Refresh activity to reflect changes
+                recreate();
+            } else {
+                Toast.makeText(this, R.string.restore_failed, Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+        return true;
+    });
 
     boolean foldableDevice = FoldStateTracker.isFoldableDevice(this);
     findPreference("margin_bottom_portrait_unfolded").setEnabled(foldableDevice);

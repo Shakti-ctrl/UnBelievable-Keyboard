@@ -290,9 +290,10 @@ public class Keyboard2View extends View
     int height =
       (int)(_tc.row_height * _keyboard.keysHeight
           + _config.marginTop + _marginBottom);
-    if (height < 100) {
-        // Fallback to a reasonable minimum height if calculation fails
-        height = (int)(dm.density * 200);
+    if (height < 200) {
+        // Force a reasonable minimum height to prevent "blank" keyboard
+        // 200dp is a safe minimum for most devices
+        height = (int)(dm.density * 250);
     }
     setMeasuredDimension(width, height);
   }
