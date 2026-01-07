@@ -139,31 +139,6 @@ public class ExtraKeysPreference extends PreferenceCategory
       case "esc":
       case "f11_placeholder":
       case "f12_placeholder":
-      case "undo":
-      case "redo":
-      case "cut":
-      case "copy":
-      case "paste":
-      case "selectAll":
-      case "shareText":
-      case "pasteAsPlainText":
-      case "alt":
-      case "meta":
-      case "capslock":
-      case "page_up":
-      case "page_down":
-      case "insert":
-      case "scroll_lock":
-      case "menu":
-      case "ctrl":
-      case "altgr":
-      case "left":
-      case "right":
-      case "up":
-      case "down":
-      case "delete":
-      case "switch_text":
-      case "switch_method":
         return true;
       default:
         return false;
