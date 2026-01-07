@@ -70,10 +70,14 @@ public class BackupRestoreSystem {
                 while (keys.hasNext()) {
                     String key = keys.next();
                     Object value = settingsJson.get(key);
+                    
                     if (value instanceof Boolean) editor.putBoolean(key, (Boolean) value);
                     else if (value instanceof Integer) editor.putInt(key, (Integer) value);
                     else if (value instanceof Long) editor.putLong(key, (Long) value);
-                    else if (value instanceof Float) editor.putFloat(key, (Float) value);
+                    else if (value instanceof Double) {
+                        // Double from JSON should be stored as Float in SharedPreferences
+                        editor.putFloat(key, ((Double) value).floatValue());
+                    }
                     else if (value instanceof String) editor.putString(key, (String) value);
                     else if (value instanceof org.json.JSONArray) {
                         org.json.JSONArray array = (org.json.JSONArray) value;
@@ -85,6 +89,9 @@ public class BackupRestoreSystem {
                     }
                 }
                 editor.apply();
+                
+                // CRITICAL: Notify the system that settings have changed
+                Config.globalConfig().refresh(context.getResources(), FoldStateTracker.isFoldableDevice(context));
             }
 
             // 2. Restore Clipboard (Append mode as requested)
