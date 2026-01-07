@@ -92,13 +92,21 @@ public class BackupRestoreSystem {
                 org.json.JSONArray clipboardJson = backup.getJSONArray("clipboard");
                 ClipboardHistoryService clipboardService = ClipboardHistoryService.get_service(context);
                 if (clipboardService != null) {
+                    java.util.List<ClipboardHistoryService.HistoryEntry> currentHistory = clipboardService.get_history_entries();
+                    java.util.Set<String> existingContent = new java.util.HashSet<>();
+                    for (ClipboardHistoryService.HistoryEntry ent : currentHistory) {
+                        existingContent.add(ent.content);
+                    }
                     for (int i = 0; i < clipboardJson.length(); i++) {
                         org.json.JSONObject item = clipboardJson.getJSONObject(i);
-                        clipboardService.add_clip_with_metadata(
-                            item.getString("content"),
-                            item.optString("description", ""),
-                            item.optString("version", "")
-                        );
+                        String content = item.getString("content");
+                        if (!existingContent.contains(content)) {
+                            clipboardService.add_clip_with_metadata(
+                                content,
+                                item.optString("description", ""),
+                                item.optString("version", "")
+                            );
+                        }
                     }
                 }
             }

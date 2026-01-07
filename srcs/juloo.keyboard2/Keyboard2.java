@@ -112,9 +112,6 @@ public class Keyboard2 extends InputMethodService
   {
     super.onCreate();
     SharedPreferences prefs = DirectBootAwarePreferences.get_shared_preferences(this);
-    if (!prefs.contains("version")) {
-        DefaultSettingsApplier.apply(this);
-    }
     _handler = new Handler(getMainLooper());
     _keyeventhandler = new KeyEventHandler(this.new Receiver());
     _foldStateTracker = new FoldStateTracker(this);

@@ -157,10 +157,10 @@ public final class Config
     swipe_dist_px = swipe_dist_value / 25.f * swipe_scaling;
     float slider_sensitivity = Float.valueOf(_prefs.getString("slider_sensitivity", "30")) / 100.f;
     slide_step_px = slider_sensitivity * swipe_scaling;
-    vibrate_custom = _prefs.getBoolean("vibrate_custom", false);
-    vibrate_duration = _prefs.getInt("vibrate_duration", 20);
+    vibrate_custom = _prefs.getBoolean("vibrate_custom", true);
+    vibrate_duration = _prefs.getInt("vibrate_duration", 41);
     longPressTimeout = _prefs.getInt("longpress_timeout", 600);
-    longPressInterval = _prefs.getInt("longpress_interval", 65);
+    longPressInterval = _prefs.getInt("longpress_interval", 12);
     keyrepeat_enabled = _prefs.getBoolean("keyrepeat_enabled", true);
     margin_bottom = get_dip_pref_oriented(dm, "margin_bottom", 7, 3);
     key_vertical_margin = get_dip_pref(dm, "key_vertical_margin", 1.5f) / 100;
@@ -178,7 +178,7 @@ public final class Config
     screenHeightPixels = dm.heightPixels;
     horizontal_margin =
       get_dip_pref_oriented(dm, "horizontal_margin", 3, 28);
-    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", false);
+    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", true);
     characterSize =
       _prefs.getFloat("character_size", 1.15f)
       * characterSizeScale;
