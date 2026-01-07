@@ -149,16 +149,4 @@
     <string name="pref_clipboard_history_duration_30">At most 30 minutes</string>
     <string name="pref_clipboard_history_duration_stop">Until the app stops</string>
     <string name="pref_dialog_edit_text">Custom definition</string>
-    <string name="pref_backup_title">Backup Settings</string>
-    <string name="pref_backup_summary">Save all settings and clipboard history to a file</string>
-    <string name="pref_restore_title">Restore Settings</string>
-    <string name="pref_restore_summary">Load settings and clipboard from a backup file</string>
-    <string name="backup_success">Backup created successfully</string>
-    <string name="restore_success">Restored successfully. Settings updated.</string>
-    <string name="restore_failed">Restore failed. Invalid file.</string>
-    <string name="pref_category_backup">Backup &amp; Restore</string>
-    <string name="pref_theme_import">Import Theme</string>
-    <string name="pref_theme_import_summary">Import theme settings from a shared code</string>
-    <string name="theme_import_success">Theme imported successfully</string>
-    <string name="theme_import_failed">Failed to import theme. Invalid code.</string>
 </resources>
